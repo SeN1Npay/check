@@ -443,10 +443,11 @@ public sealed class SessionController
 				_hotCorners = new HotCorners(profile.Desktop.HotCorners, delegate(string action)
 				{
 					DesktopAction?.Invoke(action);
-				});
+				}, profile.Palette.Accent);
 				_hotCorners.Start();
 			}
 		});
+		MemoryTrim.Schedule();
 	}
 
 	private void StopDesktopExtras()
@@ -522,6 +523,7 @@ public sealed class SessionController
 			StartWallpaper();
 			DesktopSurfaces.CloseUnused();
 			_effects?.OnWallpaperChanged();
+			MemoryTrim.Schedule();
 		});
 	}
 
