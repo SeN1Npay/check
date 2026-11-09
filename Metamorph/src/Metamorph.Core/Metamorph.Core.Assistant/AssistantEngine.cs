@@ -31,7 +31,7 @@ public sealed class AssistantEngine
 
 	static AssistantEngine()
 	{
-		Loc.AddEnglish(("Умею: «следующая тема», «тема Nord», «удиви меня», «обои котик» (по имени файла из «Моих обоев»), «следующие обои», «громкость 30», «тише», «следующий трек», «что играет», «таймер на 10 минут», «помодоро», «который час», «открой блокнот», «найди котиков», «поиграем», «тетрис», «потанцуй», «пошути».", "I can: “next theme”, “theme Nord”, “surprise me”, “wallpaper cat” (by file name from “My wallpapers”), “next wallpaper”, “volume 30”, “quieter”, “next track”, “what’s playing”, “timer for 10 minutes”, “pomodoro”, “what time is it”, “open notepad”, “search for cats”, “let's play”, “tetris”, “dance”, “tell a joke”."), ("Тетрис! Чур, я подсказываю, куда ставить палку!", "Tetris! I get to say where the long piece goes!"), ("Обожаю тетрис! Сложи мне четыре линии разом~", "I love Tetris! Clear four lines at once for me~"), ("Тетрис-тетрис! Посмотрим, кто дольше продержится.", "Tetris time! Let's see how long you last."), ("Бежим! Я прыгаю — ты жмёшь пробел!", "Let's run! I jump, you press Space!"), ("Мета-раннер! Не дай мне врезаться в кристалл~", "Meta Runner! Don't let me bump into a crystal~"), ("На старт… внимание… бежим!", "Ready… set… run!"), ("Ура, поиграем! Выбирай игру~", "Yay, let's play! Pick a game~"), ("Давай! Я уже размялась!", "Sure! I've already warmed up!"), ("Игры! Самое лучшее предложение за сегодня!", "Games! Best offer all day!"));
+		Loc.AddEnglish(("Умею: «следующая тема», «тема Nord», «удиви меня», «обои котик» (по имени файла из «Моих обоев»), «следующие обои», «громкость 30», «тише», «следующий трек», «что играет», «таймер на 10 минут», «помодоро», «который час», «открой блокнот», «найди котиков», «поиграем», «тетрис», «платформер», «потанцуй», «пошути».", "I can: “next theme”, “theme Nord”, “surprise me”, “wallpaper cat” (by file name from “My wallpapers”), “next wallpaper”, “volume 30”, “quieter”, “next track”, “what’s playing”, “timer for 10 minutes”, “pomodoro”, “what time is it”, “open notepad”, “search for cats”, “let's play”, “tetris”, “platformer”, “dance”, “tell a joke”."), ("Тетрис! Чур, я подсказываю, куда ставить палку!", "Tetris! I get to say where the long piece goes!"), ("Обожаю тетрис! Сложи мне четыре линии разом~", "I love Tetris! Clear four lines at once for me~"), ("Тетрис-тетрис! Посмотрим, кто дольше продержится.", "Tetris time! Let's see how long you last."), ("Бежим! Я прыгаю — ты жмёшь пробел!", "Let's run! I jump, you press Space!"), ("Мета-раннер! Не дай мне врезаться в кристалл~", "Meta Runner! Don't let me bump into a crystal~"), ("На старт… внимание… бежим!", "Ready… set… run!"), ("Прыгаем по блокам! Я соберу все монетки~", "Let's hop on blocks! I'll grab every coin~"), ("Мета-платформер! Чур, слаймиков не жалеем.", "Meta Quest! No mercy for slimes."), ("Вперёд, к флагу! Держи прыжок — прыгну выше.", "Onward to the flag! Hold jump and I'll go higher."), ("Ура, поиграем! Выбирай игру~", "Yay, let's play! Pick a game~"), ("Давай! Я уже размялась!", "Sure! I've already warmed up!"), ("Игры! Самое лучшее предложение за сегодня!", "Games! Best offer all day!"));
 	}
 
 	public AssistantEngine(IAssistantHost host, Func<AssistantSettings> settings, Func<ILlmClient?> llm)
@@ -111,7 +111,7 @@ public sealed class AssistantEngine
 		case IntentKind.WhoAreYou:
 			return new AssistantReply(Loc.F("Я {0} — маскот и помощница Metamorph. Меняю темы и обои, слежу за музыкой и таймерами, а ещё просто симпатичная.", mascotName), intent.Kind, MascotAction.Wave);
 		case IntentKind.Help:
-			return new AssistantReply(Loc.T("Умею: «следующая тема», «тема Nord», «удиви меня», «обои котик» (по имени файла из «Моих обоев»), «следующие обои», «громкость 30», «тише», «следующий трек», «что играет», «таймер на 10 минут», «помодоро», «который час», «открой блокнот», «найди котиков», «поиграем», «тетрис», «потанцуй», «пошути»."), intent.Kind, MascotAction.Happy);
+			return new AssistantReply(Loc.T("Умею: «следующая тема», «тема Nord», «удиви меня», «обои котик» (по имени файла из «Моих обоев»), «следующие обои», «громкость 30», «тише», «следующий трек», «что играет», «таймер на 10 минут», «помодоро», «который час», «открой блокнот», «найди котиков», «поиграем», «тетрис», «платформер», «потанцуй», «пошути»."), intent.Kind, MascotAction.Happy);
 		case IntentKind.Time:
 			return new AssistantReply(Loc.F("Сейчас {0}.", DateTime.Now.ToString("t", Loc.Culture)), intent.Kind);
 		case IntentKind.Date:
@@ -265,6 +265,7 @@ public sealed class AssistantEngine
 			return new AssistantReply(intent.Text switch
 			{
 				"tetris" => Pick("Тетрис! Чур, я подсказываю, куда ставить палку!", "Обожаю тетрис! Сложи мне четыре линии разом~", "Тетрис-тетрис! Посмотрим, кто дольше продержится."),
+				"platformer" => Pick("Прыгаем по блокам! Я соберу все монетки~", "Мета-платформер! Чур, слаймиков не жалеем.", "Вперёд, к флагу! Держи прыжок — прыгну выше."),
 				"dino" => Pick("Бежим! Я прыгаю — ты жмёшь пробел!", "Мета-раннер! Не дай мне врезаться в кристалл~", "На старт… внимание… бежим!"),
 				_ => Pick("Ура, поиграем! Выбирай игру~", "Давай! Я уже размялась!", "Игры! Самое лучшее предложение за сегодня!")
 			}, intent.Kind, MascotAction.Happy);
@@ -317,7 +318,7 @@ public sealed class AssistantEngine
 		{
 			list.Add(new LlmTool("open_app", "Launch an installed application by name.", Obj(new(string, string, string)[1] { ("name", "string", "App name, e.g. Notepad, Spotify") })));
 			list.Add(new LlmTool("web_search", "Open a web search in the browser.", Obj(new(string, string, string)[1] { ("query", "string", "Search query") })));
-			list.Add(new LlmTool("play_game", "Open a mini-game starring you (the mascot): \"dino\" (runner like the Chrome dino), \"tetris\", or \"menu\" for the game picker.", Obj(new(string, string, string)[1] { ("game", "string", "dino | tetris | menu") })));
+			list.Add(new LlmTool("play_game", "Open a mini-game starring you (the mascot): \"dino\" (runner like the Chrome dino), \"tetris\", \"platformer\" (side-scrolling platformer, Mario-like), or \"menu\" for the game picker.", Obj(new(string, string, string)[1] { ("game", "string", "dino | tetris | platformer | menu") })));
 		}
 		return list;
 		static JsonObject Obj((string Name, string Type, string Desc)[] props)
@@ -507,7 +508,7 @@ public sealed class AssistantEngine
 						break;
 					}
 					string game = Str("game").Trim().ToLowerInvariant();
-					_host.PlayGame(game.Contains("tetris") ? "tetris" : (game.Contains("dino") || game.Contains("run") ? "dino" : null));
+					_host.PlayGame(game.Contains("tetris") ? "tetris" : (game.Contains("platform") || game.Contains("mario") || game.Contains("quest") ? "platformer" : (game.Contains("dino") || game.Contains("run") ? "dino" : null)));
 					return (Result: "ok: game window opened", Mood: MascotAction.Happy);
 				}
 				case 5:
