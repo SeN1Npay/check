@@ -42,6 +42,10 @@ public static class HotkeyActions
 
 	public const string SurpriseTheme = "surpriseTheme";
 
+	public const string EditDesktop = "editDesktop";
+
+	public const string Games = "games";
+
 	public static readonly IReadOnlyList<string> All = Defaults().Keys.ToList();
 
 	public static Dictionary<string, string> Defaults()
@@ -65,7 +69,9 @@ public static class HotkeyActions
 			["nextWallpaper"] = "Ctrl+Alt+W",
 			["pauseWallpaper"] = "Ctrl+Alt+P",
 			["assistant"] = "Ctrl+Alt+A",
-			["surpriseTheme"] = "Ctrl+Alt+R"
+			["surpriseTheme"] = "Ctrl+Alt+R",
+			["editDesktop"] = "Ctrl+Alt+E",
+			["games"] = "Ctrl+Alt+G"
 		};
 	}
 }

@@ -6,6 +6,9 @@ using System.Windows;
 using System.Windows.Threading;
 using Metamorph.App.Bar;
 using Metamorph.App.Desktop;
+using Metamorph.App.Desktop.Cards;
+using Metamorph.App.Desktop.Effects;
+using Metamorph.App.Desktop.Shelves;
 using Metamorph.App.Dock;
 using Metamorph.App.Island;
 using Metamorph.App.Shell;
@@ -49,6 +52,17 @@ public sealed class SessionController
 	private DesktopWidgetWindow? _widget;
 
 	private WallpaperSession? _wallpaper;
+
+	private CardsController? _cards;
+
+	private EffectsController? _effects;
+
+	private ShelvesController? _shelves;
+
+	private HotCorners? _hotCorners;
+
+	// Выполняет действие горячего угла (назначает App).
+	public Action<string>? DesktopAction { get; set; }
 
 	private bool _barHidden;
 
@@ -393,6 +407,81 @@ public sealed class SessionController
 		});
 		Try("Обои", StartWallpaper);
 		Try("Обои: подложки", DesktopSurfaces.CloseUnused);
+		StartDesktopExtras(profile2);
+	}
+
+	private void StartDesktopExtras(ThemeProfile profile)
+	{
+		Try("Эффекты рабочего стола", delegate
+		{
+			if (EffectsController.IsNeeded(profile))
+			{
+				_effects = new EffectsController(profile, _services);
+				_effects.Start();
+			}
+		});
+		Try("Полки", delegate
+		{
+			if (ShelvesController.IsNeeded(profile))
+			{
+				_shelves = new ShelvesController(profile, _services);
+				_shelves.Start();
+			}
+		});
+		Try("Карточки рабочего стола", delegate
+		{
+			if (CardsController.IsNeeded(profile))
+			{
+				_cards = new CardsController(profile, _services);
+				_cards.Start();
+			}
+		});
+		Try("Горячие углы", delegate
+		{
+			if (profile.Desktop.HotCorners.Enabled)
+			{
+				_hotCorners = new HotCorners(profile.Desktop.HotCorners, delegate(string action)
+				{
+					DesktopAction?.Invoke(action);
+				});
+				_hotCorners.Start();
+			}
+		});
+	}
+
+	private void StopDesktopExtras()
+	{
+		Try("Карточки", delegate
+		{
+			_cards?.Dispose();
+		});
+		Try("Эффекты", delegate
+		{
+			_effects?.Dispose();
+		});
+		Try("Полки", delegate
+		{
+			_shelves?.Dispose();
+		});
+		Try("Горячие углы", delegate
+		{
+			_hotCorners?.Dispose();
+		});
+		_cards = null;
+		_effects = null;
+		_shelves = null;
+		_hotCorners = null;
+	}
+
+	// Режим редактирования рабочего стола (карточки таскаются мышью). Возвращает false, если карточки выключены.
+	public bool ToggleDesktopEdit()
+	{
+		if (_cards == null)
+		{
+			return false;
+		}
+		_cards.ToggleEditMode();
+		return true;
 	}
 
 	public ThemeProfile EffectiveWallpaper(ThemeProfile theme)
@@ -432,6 +521,7 @@ public sealed class SessionController
 			_wallpaper = null;
 			StartWallpaper();
 			DesktopSurfaces.CloseUnused();
+			_effects?.OnWallpaperChanged();
 		});
 	}
 
@@ -471,6 +561,7 @@ public sealed class SessionController
 		{
 			_wallpaper?.Dispose();
 		});
+		StopDesktopExtras();
 		_wallpaperBase = null;
 		_taskbarStyle = null;
 		_centering = null;
@@ -494,6 +585,7 @@ public sealed class SessionController
 	public void NextWallpaper()
 	{
 		_wallpaper?.NextImage();
+		_effects?.OnWallpaperChanged();
 	}
 
 	private void OnDisplaySettingsChanged(object? sender, EventArgs e)
@@ -555,6 +647,11 @@ public sealed class SessionController
 				_widget = new DesktopWidgetWindow(profile, _services);
 				_widget.Show();
 			}
+		});
+		Try("Рабочий стол после смены мониторов", delegate
+		{
+			StopDesktopExtras();
+			StartDesktopExtras(profile);
 		});
 		Try("Обои после смены мониторов", delegate
 		{

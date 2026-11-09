@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Metamorph.App.Games;
 using Metamorph.Core.Localization;
 using Metamorph.Core.Models;
 using Metamorph.Core.Services;
@@ -99,6 +100,14 @@ internal sealed class TrayIcon : IDisposable
 		contextMenuStrip.Items.Add(Loc.T("Спросить Мету…"), null, delegate
 		{
 			_app.ShowAssistant();
+		});
+		contextMenuStrip.Items.Add("🎮 " + Loc.T("Игры с Метой"), null, delegate
+		{
+			GameHub.Show(_app);
+		});
+		contextMenuStrip.Items.Add("🧩 " + Loc.T("Редактировать рабочий стол"), null, delegate
+		{
+			_app.ToggleDesktopEdit();
 		});
 		contextMenuStrip.Items.Add(new ToolStripSeparator());
 		contextMenuStrip.Items.Add(Loc.T("Вернуть исходный вид Windows"), null, async delegate

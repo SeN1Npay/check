@@ -17,6 +17,8 @@ case "$mode" in
     mkdir -p artifacts/dist
     (cd artifacts/publish && rm -f "../dist/Metamorph-$ver-win-x64.zip" && zip -qr "../dist/Metamorph-$ver-win-x64.zip" .)
     echo "artifacts/dist/Metamorph-$ver-win-x64.zip" ;;
+  test)
+    dotnet test tests/Metamorph.Tests/Metamorph.Tests.csproj -c Release ;;
   core)
     dotnet build src/Metamorph.Core/Metamorph.Core.csproj -c Release ;;
 esac

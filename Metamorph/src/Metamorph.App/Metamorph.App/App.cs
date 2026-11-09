@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Threading;
 using Metamorph.App.Assistant;
 using Metamorph.App.Desktop;
+using Metamorph.App.Games;
 using Metamorph.App.Infrastructure;
 using Metamorph.App.Launcher;
 using Metamorph.App.Mascot;
@@ -661,6 +662,7 @@ public class App : Application
 			TaskbarController.SafeShow();
 		}
 		Session = new SessionController(Services, ShowMainWindow);
+		Session.DesktopAction = RunDesktopAction;
 		_tray = new TrayIcon(this);
 		_ipc = new IpcServer(delegate(string command)
 		{
@@ -973,8 +975,71 @@ public class App : Application
 		}
 	}
 
+	public void ToggleDesktopEdit()
+	{
+		if (!Session.ToggleDesktopEdit())
+		{
+			Session.Announce("🧩", Loc.T("Карточки"), Loc.T("включите в «Редактор» → «Рабочий стол»"));
+		}
+	}
+
+	// Действия горячих углов и прочих «кнопок рабочего стола» (HotCornersSettings.Actions).
+	public void RunDesktopAction(string action)
+	{
+		try
+		{
+			switch (action)
+			{
+			case "showDesktop":
+				Win32.SendChord(91, 68);
+				break;
+			case "taskView":
+				Win32.SendChord(91, 9);
+				break;
+			case "launcher":
+				ShowLauncher();
+				break;
+			case "island":
+				Session.SummonIsland();
+				break;
+			case "assistant":
+				ShowAssistant();
+				break;
+			case "lock":
+				Win32.LockWorkStation();
+				break;
+			case "screenSaver":
+				Win32.SendMessage(Win32.GetForegroundWindow(), 274, new IntPtr(61760), IntPtr.Zero);
+				break;
+			case "games":
+				GameHub.Show(this);
+				break;
+			case "editDesktop":
+				ToggleDesktopEdit();
+				break;
+			case "nextWallpaper":
+				Session.NextWallpaper();
+				break;
+			}
+		}
+		catch (Exception ex)
+		{
+			Log.Error("Действие рабочего стола " + action, ex);
+		}
+	}
+
 	private void OnHotkey(string action)
 	{
+		if (action.Equals("editDesktop", StringComparison.OrdinalIgnoreCase))
+		{
+			ToggleDesktopEdit();
+			return;
+		}
+		if (action.Equals("games", StringComparison.OrdinalIgnoreCase))
+		{
+			GameHub.Show(this);
+			return;
+		}
 		TilingSettings s = Session.Active?.Windows.Tiling ?? new TilingSettings();
 		string text = action.ToLowerInvariant();
 		if (text == null)

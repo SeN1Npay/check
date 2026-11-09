@@ -50,7 +50,9 @@ internal sealed class SettingsView : UserControl
 		["nextWallpaper"] = "Следующие обои",
 		["pauseWallpaper"] = "Пауза GIF/видео-обоев",
 		["assistant"] = "Помощник Мета",
-		["surpriseTheme"] = "Удиви меня (случайная тема)"
+		["surpriseTheme"] = "Удиви меня (случайная тема)",
+		["editDesktop"] = "Редактировать рабочий стол (карточки)",
+		["games"] = "Игры с Метой"
 	};
 
 	public SettingsView(App app, Action<string, bool> status)

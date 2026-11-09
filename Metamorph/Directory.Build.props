@@ -1,0 +1,13 @@
+<Project>
+  <!--
+    MM_AGENT=<имя> разводит bin/obj по отдельным папкам, чтобы несколько сборок могли идти параллельно.
+    Обычная сборка (без переменной) использует стандартные bin/ и obj/.
+  -->
+  <PropertyGroup Condition="'$(MM_AGENT)' != ''">
+    <BaseIntermediateOutputPath>$(MSBuildProjectDirectory)/obj-$(MM_AGENT)/</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MSBuildProjectDirectory)/bin-$(MM_AGENT)/</BaseOutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj-*/**;bin-*/**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>

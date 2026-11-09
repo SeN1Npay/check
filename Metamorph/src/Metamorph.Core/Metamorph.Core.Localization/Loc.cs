@@ -67,6 +67,18 @@ public static class Loc
 		return value;
 	}
 
+	// Переводы новых модулей: каждый модуль регистрирует свои пары «рус → англ» при первом использовании.
+	public static void AddEnglish(params (string Ru, string En)[] pairs)
+	{
+		lock (En.Map)
+		{
+			foreach (var (ru, en) in pairs)
+			{
+				En.Map[ru] = en;
+			}
+		}
+	}
+
 	public static string F(string ru, params object?[] args)
 	{
 		return string.Format(CultureInfo.CurrentCulture, T(ru), args);
