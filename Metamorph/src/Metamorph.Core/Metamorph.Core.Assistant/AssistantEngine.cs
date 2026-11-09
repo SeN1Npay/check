@@ -29,6 +29,11 @@ public sealed class AssistantEngine
 
 	public static readonly string[] Jokes = new string[8] { "Почему программисты путают Хэллоуин и Рождество? Потому что 31 OCT = 25 DEC.", "Я хотела сменить тему разговора, но применилась тема оформления.", "— Мета, ты умеешь хранить секреты? — Конечно! Они у меня в %APPDATA%.", "Обои бывают живые и мёртвые. Мёртвые — это которые «Windows по умолчанию».", "Компьютер медленный? Просто он думает о прекрасном.", "Мой любимый напиток — Java. Но пью только чай.", "Есть 10 типов людей: те, кто понимает двоичную систему, и те, кто нет.", "Я не ленивая — я в режиме энергосбережения." };
 
+	static AssistantEngine()
+	{
+		Loc.AddEnglish(("Умею: «следующая тема», «тема Nord», «удиви меня», «обои котик» (по имени файла из «Моих обоев»), «следующие обои», «громкость 30», «тише», «следующий трек», «что играет», «таймер на 10 минут», «помодоро», «который час», «открой блокнот», «найди котиков», «поиграем», «тетрис», «потанцуй», «пошути».", "I can: “next theme”, “theme Nord”, “surprise me”, “wallpaper cat” (by file name from “My wallpapers”), “next wallpaper”, “volume 30”, “quieter”, “next track”, “what’s playing”, “timer for 10 minutes”, “pomodoro”, “what time is it”, “open notepad”, “search for cats”, “let's play”, “tetris”, “dance”, “tell a joke”."), ("Тетрис! Чур, я подсказываю, куда ставить палку!", "Tetris! I get to say where the long piece goes!"), ("Обожаю тетрис! Сложи мне четыре линии разом~", "I love Tetris! Clear four lines at once for me~"), ("Тетрис-тетрис! Посмотрим, кто дольше продержится.", "Tetris time! Let's see how long you last."), ("Бежим! Я прыгаю — ты жмёшь пробел!", "Let's run! I jump, you press Space!"), ("Мета-раннер! Не дай мне врезаться в кристалл~", "Meta Runner! Don't let me bump into a crystal~"), ("На старт… внимание… бежим!", "Ready… set… run!"), ("Ура, поиграем! Выбирай игру~", "Yay, let's play! Pick a game~"), ("Давай! Я уже размялась!", "Sure! I've already warmed up!"), ("Игры! Самое лучшее предложение за сегодня!", "Games! Best offer all day!"));
+	}
+
 	public AssistantEngine(IAssistantHost host, Func<AssistantSettings> settings, Func<ILlmClient?> llm)
 	{
 		_host = host;
@@ -54,7 +59,7 @@ public sealed class AssistantEngine
 		bool llmOn = assistantSettings.Llm.Enabled && _llm() != null;
 		if (intent.Kind != 0)
 		{
-			if (flag && intent.IsLocalOnly)
+			if (flag && (intent.IsLocalOnly || intent.Kind == IntentKind.PlayGame))
 			{
 				return new AssistantReply(Loc.T("Это я могу сделать только на самом компьютере."), intent.Kind, MascotAction.Think);
 			}
@@ -106,7 +111,7 @@ public sealed class AssistantEngine
 		case IntentKind.WhoAreYou:
 			return new AssistantReply(Loc.F("Я {0} — маскот и помощница Metamorph. Меняю темы и обои, слежу за музыкой и таймерами, а ещё просто симпатичная.", mascotName), intent.Kind, MascotAction.Wave);
 		case IntentKind.Help:
-			return new AssistantReply(Loc.T("Умею: «следующая тема», «тема Nord», «удиви меня», «обои котик» (по имени файла из «Моих обоев»), «следующие обои», «громкость 30», «тише», «следующий трек», «что играет», «таймер на 10 минут», «помодоро», «который час», «открой блокнот», «найди котиков», «потанцуй», «пошути»."), intent.Kind, MascotAction.Happy);
+			return new AssistantReply(Loc.T("Умею: «следующая тема», «тема Nord», «удиви меня», «обои котик» (по имени файла из «Моих обоев»), «следующие обои», «громкость 30», «тише», «следующий трек», «что играет», «таймер на 10 минут», «помодоро», «который час», «открой блокнот», «найди котиков», «поиграем», «тетрис», «потанцуй», «пошути»."), intent.Kind, MascotAction.Happy);
 		case IntentKind.Time:
 			return new AssistantReply(Loc.F("Сейчас {0}.", DateTime.Now.ToString("t", Loc.Culture)), intent.Kind);
 		case IntentKind.Date:
@@ -255,6 +260,14 @@ public sealed class AssistantEngine
 		case IntentKind.Launcher:
 			_host.ShowLauncher();
 			return new AssistantReply(Loc.T("Открыла лаунчер."), intent.Kind);
+		case IntentKind.PlayGame:
+			_host.PlayGame(intent.Text);
+			return new AssistantReply(intent.Text switch
+			{
+				"tetris" => Pick("Тетрис! Чур, я подсказываю, куда ставить палку!", "Обожаю тетрис! Сложи мне четыре линии разом~", "Тетрис-тетрис! Посмотрим, кто дольше продержится."),
+				"dino" => Pick("Бежим! Я прыгаю — ты жмёшь пробел!", "Мета-раннер! Не дай мне врезаться в кристалл~", "На старт… внимание… бежим!"),
+				_ => Pick("Ура, поиграем! Выбирай игру~", "Давай! Я уже размялась!", "Игры! Самое лучшее предложение за сегодня!")
+			}, intent.Kind, MascotAction.Happy);
 		default:
 			return null;
 		}
@@ -304,6 +317,7 @@ public sealed class AssistantEngine
 		{
 			list.Add(new LlmTool("open_app", "Launch an installed application by name.", Obj(new(string, string, string)[1] { ("name", "string", "App name, e.g. Notepad, Spotify") })));
 			list.Add(new LlmTool("web_search", "Open a web search in the browser.", Obj(new(string, string, string)[1] { ("query", "string", "Search query") })));
+			list.Add(new LlmTool("play_game", "Open a mini-game starring you (the mascot): \"dino\" (runner like the Chrome dino), \"tetris\", or \"menu\" for the game picker.", Obj(new(string, string, string)[1] { ("game", "string", "dino | tetris | menu") })));
 		}
 		return list;
 		static JsonObject Obj((string Name, string Type, string Desc)[] props)
@@ -485,6 +499,16 @@ public sealed class AssistantEngine
 					string text2 = Str("name").Trim();
 					AssistantReply assistantReply = await ExecuteAsync((text2.Equals("next", StringComparison.OrdinalIgnoreCase) || text2.Length == 0) ? new Intent(IntentKind.NextWallpaper) : new Intent(IntentKind.SetWallpaper, text2));
 					return ((object)assistantReply == null) ? (Result: "error: wallpaper not found. Available: " + string.Join(", ", _host.WallpaperNames), Mood: (MascotAction?)null) : (Result: "ok: " + assistantReply.Text, Mood: MascotAction.Happy);
+				}
+				case 9:
+				{
+					if (!(name == "play_game") || source != 0)
+					{
+						break;
+					}
+					string game = Str("game").Trim().ToLowerInvariant();
+					_host.PlayGame(game.Contains("tetris") ? "tetris" : (game.Contains("dino") || game.Contains("run") ? "dino" : null));
+					return (Result: "ok: game window opened", Mood: MascotAction.Happy);
 				}
 				case 5:
 				{

@@ -82,8 +82,21 @@ internal sealed class AnimatedWallpaper
 		WallpaperThread.Post(delegate
 		{
 			_stopped = true;
+			DesktopActivity.Changed -= OnActivityChanged;
 			StopCore();
 			_state = "animated=stopped";
+		});
+	}
+
+	// Событие приходит с чужого потока — пересчитываем паузу на потоке обоев.
+	private void OnActivityChanged()
+	{
+		WallpaperThread.Post(delegate
+		{
+			if (!_stopped)
+			{
+				UpdatePause();
+			}
 		});
 	}
 
@@ -98,6 +111,8 @@ internal sealed class AnimatedWallpaper
 					Interval = TimeSpan.FromSeconds(1.5)
 				};
 			}
+			DesktopActivity.Changed -= OnActivityChanged;
+			DesktopActivity.Changed += OnActivityChanged;
 			_guard.Tick -= OnGuard;
 			_guard.Tick += OnGuard;
 			_guard.Start();
@@ -125,7 +140,11 @@ internal sealed class AnimatedWallpaper
 		bool flag = GifAnimation.IsGif(_path);
 		if (flag)
 		{
-			_gif = new GifPlayer(_path, (readOnlyList.Count == 0) ? 1920 : readOnlyList.Max((Display d) => d.Bounds.Width));
+			// Кадры декодируются под самый большой монитор; при «По центру» размер картинки важен — не масштабируем.
+			bool center = _style == WallpaperStyle.Center;
+			int targetWidth = (center ? 0 : ((readOnlyList.Count == 0) ? 1920 : readOnlyList.Max((Display d) => d.Bounds.Width)));
+			int targetHeight = (center ? 0 : ((readOnlyList.Count == 0) ? 1080 : readOnlyList.Max((Display d) => d.Bounds.Height)));
+			_gif = new GifPlayer(_path, targetWidth, targetHeight);
 		}
 		foreach (Display item in readOnlyList)
 		{
@@ -244,6 +263,8 @@ internal sealed class AnimatedWallpaper
 		}
 		WallpaperPrefs wallpaper = _services.Settings.Current.Wallpaper;
 		bool flag = wallpaper.PauseOnBattery && OnBattery();
+		// Блокировка, удалённый сеанс, экономия заряда — анимация никому не нужна.
+		bool activity = !DesktopActivity.CanAnimate;
 		Point? point = DesktopLayer.CoveredMonitor(wallpaper.PauseWhenCovered);
 		_coveredStreak = (point.HasValue ? (_coveredStreak + 1) : 0);
 		foreach (Placed item in _placed)
@@ -262,14 +283,14 @@ internal sealed class AnimatedWallpaper
 			goto IL_00ab;
 			IL_00ab:
 			bool flag2 = (byte)num != 0;
-			bool flag3 = _manualPause || flag || flag2;
+			bool flag3 = _manualPause || flag || flag2 || activity;
 			if (item.Content.Paused != flag3)
 			{
 				item.Content.Paused = flag3;
 			}
 		}
 		_gif?.Reschedule();
-		_state = "animated file=" + Path.GetFileName(_path) + " surfaces=" + string.Join(",", _placed.Select((Placed p) => p.Display.Name + ":" + (p.Content.Paused ? "paused" : "playing"))) + (flag ? " battery" : "") + ((_restarts.Trips > 0) ? $" restarts-blocked={_restarts.Trips}" : "");
+		_state = "animated file=" + Path.GetFileName(_path) + " surfaces=" + string.Join(",", _placed.Select((Placed p) => p.Display.Name + ":" + (p.Content.Paused ? "paused" : "playing"))) + (flag ? " battery" : "") + (DesktopActivity.Locked ? " locked" : "") + (DesktopActivity.Remote ? " remote" : "") + (DesktopActivity.EnergySaver ? " energysaver" : "") + ((_restarts.Trips > 0) ? $" restarts-blocked={_restarts.Trips}" : "");
 	}
 
 	private static bool OnBattery()
