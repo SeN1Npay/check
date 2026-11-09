@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using Metamorph.App.Bar;
 using Metamorph.Core.Services;
@@ -13,6 +14,7 @@ public sealed record SensorSnapshot(double? Cpu, double? Gpu, double? RamUsedGb,
 
 // Один опрос датчиков на всё приложение: панель, виджет и карточки читают общий снимок.
 // Опрос идёт только пока есть хотя бы одна аренда (Acquire), GPU — только по отдельной аренде (счётчик дорогой).
+// Сам замер — в пуле потоков (PDH и список сетевых адаптеров бывают медленными), снимок и событие — на UI-потоке.
 internal sealed class SensorHub
 {
 	private sealed class Lease : IDisposable
@@ -37,6 +39,8 @@ internal sealed class SensorHub
 
 	private readonly SystemStats _stats = new SystemStats();
 
+	private readonly object _gpuGate = new object();
+
 	private DispatcherTimer? _timer;
 
 	private GpuCounter? _gpuCounter;
@@ -45,7 +49,12 @@ internal sealed class SensorHub
 
 	private int _gpuLeases;
 
+	private bool _sampling;
+
 	public SensorSnapshot Current { get; private set; } = SensorSnapshot.Empty;
+
+	// false — счётчик GPU в системе недоступен (модуль прячется).
+	public bool GpuAvailable { get; private set; } = true;
 
 	// Новый снимок (на UI-потоке, раз в секунду).
 	public event Action<SensorSnapshot>? Updated;
@@ -85,8 +94,11 @@ internal sealed class SensorHub
 			_gpuLeases = Math.Max(0, _gpuLeases - 1);
 			if (_gpuLeases == 0)
 			{
-				_gpuCounter?.Dispose();
-				_gpuCounter = null;
+				lock (_gpuGate)
+				{
+					_gpuCounter?.Dispose();
+					_gpuCounter = null;
+				}
 			}
 		}
 		if (_leases == 0)
@@ -97,23 +109,57 @@ internal sealed class SensorHub
 
 	private void Sample()
 	{
-		try
+		if (_sampling)
 		{
-			double? gpu = null;
-			if (_gpuLeases > 0)
+			return;
+		}
+		_sampling = true;
+		bool wantGpu = _gpuLeases > 0;
+		Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
+		Task.Run(() => Read(wantGpu)).ContinueWith(delegate(Task<SensorSnapshot?> t)
+		{
+			dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)delegate
+			{
+				_sampling = false;
+				if (t.IsFaulted)
+				{
+					Log.Error("Датчики: опрос", t.Exception?.GetBaseException());
+					return;
+				}
+				SensorSnapshot? snapshot = t.Result;
+				if (snapshot == null || _leases == 0)
+				{
+					return;
+				}
+				Current = snapshot;
+				try
+				{
+					this.Updated?.Invoke(snapshot);
+				}
+				catch (Exception ex)
+				{
+					Log.Error("Датчики: подписчик", ex);
+				}
+			});
+		}, TaskScheduler.Default);
+	}
+
+	// Пул потоков; _stats трогает только он (повторный запуск исключён флагом _sampling).
+	private SensorSnapshot? Read(bool wantGpu)
+	{
+		double? gpu = null;
+		if (wantGpu)
+		{
+			lock (_gpuGate)
 			{
 				_gpuCounter ??= new GpuCounter();
 				gpu = (_gpuCounter.Available ? _gpuCounter.Read() : null);
+				GpuAvailable = _gpuCounter.Available;
 			}
-			(double UsedGb, double TotalGb, uint Load)? memory = SystemStats.Memory();
-			(double Down, double Up)? network = _stats.Network();
-			(int Percent, bool Charging)? battery = SystemStats.Battery();
-			Current = new SensorSnapshot(_stats.Cpu(), gpu, memory?.UsedGb, memory?.TotalGb, memory?.Load, network?.Down, network?.Up, battery?.Percent, battery?.Charging ?? false, DateTime.UtcNow);
-			this.Updated?.Invoke(Current);
 		}
-		catch (Exception ex)
-		{
-			Log.Error("Датчики: опрос", ex);
-		}
+		(double UsedGb, double TotalGb, uint Load)? memory = SystemStats.Memory();
+		(double Down, double Up)? network = _stats.Network();
+		(int Percent, bool Charging)? battery = SystemStats.Battery();
+		return new SensorSnapshot(_stats.Cpu(), gpu, memory?.UsedGb, memory?.TotalGb, memory?.Load, network?.Down, network?.Up, battery?.Percent, battery?.Charging ?? false, DateTime.UtcNow);
 	}
 }
