@@ -1,0 +1,113 @@
+{
+  "id": "everforest",
+  "name": "Everforest",
+  "description": "Спокойная лесная зелень: мягкий контраст для долгой работы. Powerline-панель, тайлинг с отступами.",
+  "author": "Metamorph",
+  "mode": "dark",
+  "palette": {
+    "background": "#2D353B",
+    "surface": "#3D484D",
+    "foreground": "#D3C6AA",
+    "muted": "#859289",
+    "accent": "#A7C080",
+    "accent2": "#83C092",
+    "red": "#E67E80",
+    "green": "#A7C080",
+    "yellow": "#DBBC7F"
+  },
+  "wallpaper": {
+    "kind": "gradient",
+    "from": "#232A2E",
+    "to": "#3D484D",
+    "direction": "diagonal",
+    "style": "fill"
+  },
+  "system": {
+    "transparency": true,
+    "accentOnTaskbar": true,
+    "accentOnTitleBars": true
+  },
+  "taskbar": {
+    "mode": "hidden"
+  },
+  "bar": {
+    "enabled": true,
+    "position": "top",
+    "height": 28,
+    "opacity": 0.85,
+    "blur": true,
+    "fontFamily": "JetBrains Mono, Cascadia Mono, Consolas",
+    "fontSize": 13,
+    "clockFormat": "ddd dd MMM  HH:mm",
+    "left": [
+      "launcher",
+      "workspaces"
+    ],
+    "center": [
+      "window"
+    ],
+    "right": [
+      "cpu",
+      "ram",
+      "disk",
+      "volume",
+      "clock",
+      "tray"
+    ],
+    "style": "powerline"
+  },
+  "dock": {
+    "enabled": true,
+    "position": "left",
+    "behavior": "autoHide",
+    "style": "flat",
+    "iconSize": 48,
+    "hoverEffect": "lift",
+    "magnification": 1.9,
+    "magnifyRange": 2.5,
+    "spacing": 8,
+    "padding": 9,
+    "margin": 8,
+    "cornerRadius": 18,
+    "opacity": 0.8,
+    "indicator": "line",
+    "bounceOnLaunch": true,
+    "bounceOnAttention": true,
+    "showLabels": false,
+    "showAppsButton": true,
+    "showTrash": true,
+    "showRunningApps": true,
+    "animationSpeed": 1.0
+  },
+  "windows": {
+    "activeBorder": {
+      "enabled": true,
+      "width": 2,
+      "gradient": false,
+      "radius": 8
+    },
+    "tiling": {
+      "hotkeys": true,
+      "gaps": 10,
+      "masterRatio": 0.55,
+      "engine": "none"
+    }
+  },
+  "desktop": {
+    "hideIcons": true,
+    "widget": {
+      "enabled": true,
+      "corner": "topRight",
+      "modules": [
+        "clock",
+        "date",
+        "cpu",
+        "ram",
+        "disk",
+        "uptime"
+      ],
+      "scale": 1.0,
+      "opacity": 0.0
+    }
+  }
+}

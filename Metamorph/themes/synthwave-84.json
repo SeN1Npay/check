@@ -1,0 +1,110 @@
+{
+  "id": "synthwave-84",
+  "name": "Synthwave '84",
+  "description": "Неоновый закат восьмидесятых: розовый и бирюзовый неон и «остров» сверху.",
+  "author": "Metamorph",
+  "mode": "dark",
+  "palette": {
+    "background": "#262335",
+    "surface": "#34294F",
+    "foreground": "#F4EEFF",
+    "muted": "#848BBD",
+    "accent": "#FF7EDB",
+    "accent2": "#36F9F6",
+    "red": "#FE4450",
+    "green": "#72F1B8",
+    "yellow": "#FEDE5D"
+  },
+  "wallpaper": {
+    "kind": "gradient",
+    "from": "#120B24",
+    "to": "#3B1B4F",
+    "direction": "vertical",
+    "style": "fill"
+  },
+  "system": {
+    "transparency": true,
+    "accentOnTaskbar": true,
+    "accentOnTitleBars": true
+  },
+  "taskbar": {
+    "mode": "hidden"
+  },
+  "bar": {
+    "enabled": true,
+    "position": "top",
+    "height": 28,
+    "opacity": 0.8,
+    "blur": true,
+    "fontFamily": "JetBrains Mono, Cascadia Mono, Consolas",
+    "fontSize": 13,
+    "clockFormat": "ddd dd MMM  HH:mm",
+    "left": [
+      "launcher",
+      "workspaces",
+      "window"
+    ],
+    "center": [],
+    "right": [
+      "cava",
+      "layout",
+      "volume",
+      "cpu",
+      "ram",
+      "battery",
+      "clock",
+      "tray"
+    ]
+  },
+  "dock": {
+    "enabled": true,
+    "position": "bottom",
+    "behavior": "dodgeWindows",
+    "style": "glass",
+    "iconSize": 48,
+    "hoverEffect": "magnify",
+    "magnification": 1.8,
+    "magnifyRange": 2.5,
+    "spacing": 8,
+    "padding": 9,
+    "margin": 8,
+    "cornerRadius": 18,
+    "opacity": 0.72,
+    "indicator": "dots",
+    "bounceOnLaunch": true,
+    "bounceOnAttention": true,
+    "showLabels": true,
+    "showAppsButton": true,
+    "showTrash": true,
+    "showRunningApps": true,
+    "animationSpeed": 1.0
+  },
+  "island": {
+    "enabled": true,
+    "screens": "primary",
+    "overBar": false,
+    "offset": 6,
+    "height": 34,
+    "width": 260,
+    "expandedWidth": 400,
+    "idle": "clock",
+    "background": "#0E0A1A",
+    "opacity": 0.94,
+    "albumArt": true,
+    "visualizer": true,
+    "expandOnHover": true,
+    "trackPopupSeconds": 3,
+    "activities": [
+      "volume",
+      "layout",
+      "capslock",
+      "battery",
+      "theme",
+      "privacy",
+      "network"
+    ],
+    "animationSpeed": 1.0,
+    "hideInFullscreen": true,
+    "clockFormat": "HH:mm"
+  }
+}
