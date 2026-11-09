@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -57,14 +58,34 @@ internal sealed class SystemStats
 		return ((double)(buffer.ullTotalPhys - buffer.ullAvailPhys) / 1073741824.0, (double)buffer.ullTotalPhys / 1073741824.0, buffer.dwMemoryLoad);
 	}
 
+	private static readonly Dictionary<string, (DateTime At, (string Name, double UsedPercent, double FreeGb)? Value)> DiskCache = new Dictionary<string, (DateTime, (string, double, double)?)>(StringComparer.OrdinalIgnoreCase);
+
+	// Диск меняется медленно: один замер на 30 с для всех потребителей (панель, виджет, карточки).
 	public static (string Name, double UsedPercent, double FreeGb)? Disk(string? root = null)
+	{
+		if (root == null)
+		{
+			root = Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.Windows)) ?? "C:\\";
+		}
+		lock (DiskCache)
+		{
+			if (DiskCache.TryGetValue(root, out var cached) && DateTime.UtcNow - cached.At < TimeSpan.FromSeconds(30.0))
+			{
+				return cached.Value;
+			}
+		}
+		(string, double, double)? value = ReadDisk(root);
+		lock (DiskCache)
+		{
+			DiskCache[root] = (DateTime.UtcNow, value);
+		}
+		return value;
+	}
+
+	private static (string Name, double UsedPercent, double FreeGb)? ReadDisk(string root)
 	{
 		try
 		{
-			if (root == null)
-			{
-				root = Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.Windows)) ?? "C:\\";
-			}
 			DriveInfo driveInfo = new DriveInfo(root);
 			if (!driveInfo.IsReady || driveInfo.TotalSize <= 0)
 			{
