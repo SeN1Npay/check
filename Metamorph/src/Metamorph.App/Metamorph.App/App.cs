@@ -618,6 +618,7 @@ public class App : Application
 	protected override void OnStartup(StartupEventArgs e)
 	{
 		base.OnStartup(e);
+		ModernStyles.Install(this);
 		CommandLineOptions commandLineOptions = CommandLineOptions.Parse(e.Args);
 		if (commandLineOptions.Uninstall)
 		{

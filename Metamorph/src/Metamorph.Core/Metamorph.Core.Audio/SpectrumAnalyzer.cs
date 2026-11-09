@@ -69,6 +69,7 @@ public sealed class SpectrumAnalyzer
 		}
 		_bandStart = new int[bands];
 		_bandEnd = new int[bands];
+		_db = new double[bands];
 		double val = (double)sampleRate / 2.0;
 		maxHz = Math.Min(maxHz, val);
 		double num = (double)sampleRate / (double)fftSize;
@@ -131,7 +132,7 @@ public sealed class SpectrumAnalyzer
 			}
 			Fft.Transform(_re, _im);
 			double num2 = 4.0 / (double)num;
-			double num3 = CeilingDb - FloorDb;
+			double peak = double.NegativeInfinity;
 			for (int j = 0; j < Bands && j < result.Length; j++)
 			{
 				double num4 = 0.0;
@@ -144,10 +145,63 @@ public sealed class SpectrumAnalyzer
 					}
 				}
 				double num6 = Math.Log2((double)Math.Max(1, _bandStart[j]) / (double)Math.Max(1, _bandStart[0]));
-				double num7 = 20.0 * Math.Log10(num4 + 1E-12) + 1.5 * num6;
-				result[j] = (float)Math.Clamp((num7 - FloorDb) / num3, 0.0, 1.0);
+				double db = 20.0 * Math.Log10(num4 + 1E-12) + 1.5 * num6;
+				_db[j] = db;
+				peak = Math.Max(peak, db);
+			}
+			(double floor, double ceiling) = Range(peak);
+			double range = ceiling - floor;
+			for (int j = 0; j < Bands && j < result.Length; j++)
+			{
+				result[j] = (float)Math.Clamp((_db[j] - floor) / range, 0.0, 1.0);
 			}
 		}
+	}
+
+	// Автоусиление: потолок следует за громкостью трека (быстро вверх, медленно вниз), чтобы громкая музыка
+	// не упиралась всеми полосами в максимум, а тихая не терялась у пола.
+	public bool AutoGain { get; set; } = true;
+
+	// Сколько дБ под текущим потолком видно на шкале.
+	public double DynamicRangeDb { get; set; } = 48.0;
+
+	private readonly double[] _db;
+
+	private double _gainCeiling = double.NaN;
+
+	private long _gainAt;
+
+	private (double Floor, double Ceiling) Range(double peak)
+	{
+		if (!AutoGain || double.IsNegativeInfinity(peak))
+		{
+			return (FloorDb, CeilingDb);
+		}
+		long now = System.Diagnostics.Stopwatch.GetTimestamp();
+		double dt = (_gainAt == 0L) ? 0.0 : Math.Min(1.0, (double)(now - _gainAt) / (double)System.Diagnostics.Stopwatch.Frequency);
+		_gainAt = now;
+		return StepGain(peak, dt);
+	}
+
+	// Шаг автоусиления; dt — секунды с прошлого кадра. Вынесено отдельно для тестов.
+	public (double Floor, double Ceiling) StepGain(double peakDb, double dt)
+	{
+		double minCeiling = FloorDb + DynamicRangeDb * 0.5;
+		double target = Math.Clamp(peakDb + 2.0, minCeiling, 6.0);
+		if (double.IsNaN(_gainCeiling))
+		{
+			_gainCeiling = Math.Max(target, CeilingDb);
+		}
+		else if (target > _gainCeiling)
+		{
+			_gainCeiling += (target - _gainCeiling) * (1.0 - Math.Exp(-dt * 25.0));
+		}
+		else
+		{
+			// ~6 дБ/с вниз: пауза в треке не раздувает шум.
+			_gainCeiling = Math.Max(target, _gainCeiling - 6.0 * dt);
+		}
+		return (Math.Max(FloorDb, _gainCeiling - DynamicRangeDb), _gainCeiling);
 	}
 
 	public static float[] Resample(IReadOnlyList<float> bands, int count)

@@ -128,11 +128,50 @@ public class MainWindow : Window, IComponentConnector
 
 	private bool _contentLoaded;
 
+	// Галочка «Панель»/«Док» и её списки переносятся строкой целиком, а у списков дока появляется подпись.
+	private void GroupOptions()
+	{
+		Loc.AddEnglish(("Позиция и поведение:", "Position & behavior:"));
+		try
+		{
+			Join(BarEnabledCheck, BarPositionCombo.Parent as Panel, null);
+			Join(DockEnabledCheck, DockPositionCombo.Parent as Panel, Loc.T("Позиция и поведение:"));
+		}
+		catch (Exception ex)
+		{
+			Log.Error("Окно: группировка настроек", ex);
+		}
+		void Join(CheckBox check, Panel? group, string? label)
+		{
+			if (group == null || check.Parent is not Panel owner || owner == group)
+			{
+				return;
+			}
+			owner.Children.Remove(check);
+			if (label != null && ((StackPanel)BarPositionCombo.Parent).Children[0] is TextBlock sample)
+			{
+				group.Children.Insert(0, new TextBlock
+				{
+					Text = label,
+					Foreground = sample.Foreground,
+					FontWeight = sample.FontWeight,
+					Margin = sample.Margin,
+					VerticalAlignment = VerticalAlignment.Center
+				});
+			}
+			check.Margin = new Thickness(0.0, 0.0, 14.0, 0.0);
+			check.VerticalAlignment = VerticalAlignment.Center;
+			group.Children.Insert(0, check);
+		}
+	}
+
 	public MainWindow(App app)
 	{
 		InitializeComponent();
 		_app = app;
 		Localizer.Apply(this);
+		GroupOptions();
+		TitleBar.Apply(this, "Metamorph");
 		_editor = new EditorView(app, delegate(string? id)
 		{
 			LoadThemes(id);
