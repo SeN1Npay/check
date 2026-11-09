@@ -97,13 +97,17 @@ internal sealed class AudioSpectrum
 			Array.Clear(target);
 			return false;
 		}
-		long tickCount = Environment.TickCount64;
-		if (tickCount - _cacheTicks > 12)
+		// Читают с UI-потока (панель, остров, Мета) и с потока обоев (эффекты) — кэш под замком.
+		lock (_cache)
 		{
-			_analyzer.Compute(_cache);
-			_cacheTicks = tickCount;
+			long tickCount = Environment.TickCount64;
+			if (tickCount - _cacheTicks > 12)
+			{
+				_analyzer.Compute(_cache);
+				_cacheTicks = tickCount;
+			}
+			Array.Copy(_cache, target, Math.Min(target.Length, _cache.Length));
 		}
-		Array.Copy(_cache, target, Math.Min(target.Length, _cache.Length));
 		return true;
 	}
 

@@ -51,7 +51,13 @@ public sealed class WeatherService
 		}
 		if (string.IsNullOrWhiteSpace(s.City))
 		{
-			return null;
+			(double Lat, double Lon, string Name)? located = s.AutoLocate ? (await LocateAsync(ct)) : null;
+			if (!located.HasValue)
+			{
+				return null;
+			}
+			(value3, value2, place) = located.Value;
+			goto IL_021e;
 		}
 		(double, double, string)? tuple = ParseGeocoding(await Http.GetStringAsync("https://geocoding-api.open-meteo.com/v1/search?name=" + Uri.EscapeDataString(s.City) + "&count=1&language=ru&format=json", ct));
 		if (!tuple.HasValue)
@@ -69,6 +75,46 @@ public sealed class WeatherService
 			_cache[key] = (DateTime.UtcNow, weatherNow);
 		}
 		return weatherNow;
+	}
+
+	private static (DateTime At, (double Lat, double Lon, string Name) Value)? _located;
+
+	private static async Task<(double Lat, double Lon, string Name)?> LocateAsync(CancellationToken ct)
+	{
+		if (_located.HasValue && DateTime.UtcNow - _located.Value.At < TimeSpan.FromHours(6.0))
+		{
+			return _located.Value.Value;
+		}
+		try
+		{
+			(double, double, string)? found = ParseIpLocation(await Http.GetStringAsync("https://ipwho.is/?fields=success,latitude,longitude,city&lang=ru", ct));
+			if (found.HasValue)
+			{
+				_located = (DateTime.UtcNow, found.Value);
+			}
+			return found;
+		}
+		catch (Exception ex) when (ex is HttpRequestException || ex is TaskCanceledException || ex is JsonException)
+		{
+			Log.Warn("Погода: не удалось определить место по IP — " + ex.Message);
+			return null;
+		}
+	}
+
+	public static (double Lat, double Lon, string Name)? ParseIpLocation(string json)
+	{
+		using JsonDocument doc = JsonDocument.Parse(json);
+		JsonElement root = doc.RootElement;
+		if (root.ValueKind != JsonValueKind.Object || (root.TryGetProperty("success", out JsonElement ok) && ok.ValueKind == JsonValueKind.False))
+		{
+			return null;
+		}
+		if (!root.TryGetProperty("latitude", out JsonElement lat) || !root.TryGetProperty("longitude", out JsonElement lon) || lat.ValueKind != JsonValueKind.Number || lon.ValueKind != JsonValueKind.Number)
+		{
+			return null;
+		}
+		string name = (root.TryGetProperty("city", out JsonElement city) && city.ValueKind == JsonValueKind.String) ? (city.GetString() ?? "") : "";
+		return (lat.GetDouble(), lon.GetDouble(), name);
 	}
 
 	public static (double Lat, double Lon, string Name)? ParseGeocoding(string json)

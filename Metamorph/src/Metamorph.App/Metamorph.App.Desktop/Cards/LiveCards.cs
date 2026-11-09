@@ -124,7 +124,7 @@ internal sealed class WeatherCard : CardView
 			_glyph.Opacity = 0.45;
 			_temp.Text = "—";
 			_desc.Text = _failed ? Loc.T("Нет данных о погоде") : Loc.T("Загрузка…");
-			_place.Text = _failed ? Loc.T("Проверьте подключение") : "";
+			_place.Text = !_failed ? "" : ((string.IsNullOrWhiteSpace(Context.Profile.Bar.Weather.City) && Context.Profile.Bar.Weather.Latitude == null) ? Loc.T("Укажите город: «Редактор» → «Панель (бар)» → «Погода»") : Loc.T("Проверьте подключение"));
 			return;
 		}
 		_glyph.Text = w.Icon;

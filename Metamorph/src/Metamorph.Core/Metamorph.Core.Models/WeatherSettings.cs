@@ -10,4 +10,7 @@ public sealed class WeatherSettings
 	public double? Longitude { get; set; }
 
 	public bool Fahrenheit { get; set; }
+
+	// Город и координаты не заданы — определить место по IP (приблизительно, до города).
+	public bool AutoLocate { get; set; } = true;
 }
