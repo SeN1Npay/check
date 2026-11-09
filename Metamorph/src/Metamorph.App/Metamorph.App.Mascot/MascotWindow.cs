@@ -618,6 +618,37 @@ internal sealed class MascotWindow : Window
 			Brain.Command(MascotAction.Sleep);
 		});
 		menu.Items.Add(new Separator());
+		MenuItem games = new MenuItem
+		{
+			Header = Loc.T("🎮 Поиграем")
+		};
+		foreach ((string title, string? id) in new (string, string?)[3]
+		{
+			(Loc.T("Мета-раннер"), "dino"),
+			(Loc.T("Тетрис"), "tetris"),
+			(Loc.T("Все игры…"), null)
+		})
+		{
+			MenuItem item = new MenuItem
+			{
+				Header = title
+			};
+			item.Click += delegate
+			{
+				try
+				{
+					Brain.Command(MascotAction.Happy);
+					Metamorph.App.Games.GameHub.Show(_app, id);
+				}
+				catch (Exception ex)
+				{
+					Log.Error("Маскот: меню игр", ex);
+				}
+			};
+			games.Items.Add(item);
+		}
+		menu.Items.Add(games);
+		menu.Items.Add(new Separator());
 		Add(Loc.T("Настройки Мета-тян…"), _app.ShowMascotTab);
 		Add(Loc.T("Спрятать"), _app.ToggleMascot);
 		menu.IsOpen = true;
