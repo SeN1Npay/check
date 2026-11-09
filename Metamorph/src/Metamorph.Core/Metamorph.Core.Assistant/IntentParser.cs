@@ -303,6 +303,9 @@ public static class IntentParser
 			}
 			return (Intent?)null;
 		});
+		Add("(?:^|\\s)(?:тетрис\\w*|tetris)(?:\\s|$)", (Match _, string _) => new Intent(IntentKind.PlayGame, "tetris"));
+		Add("(?:^|\\s)(?:динозавр\\w*|дино|(?:мета[\\s-]?)?раннер\\w*|бегалк\\w*|dino(?:saur)?|(?:meta[\\s-]?)?runner)(?:\\s|$)", (Match _, string _) => new Intent(IntentKind.PlayGame, "dino"));
+		Simple("(?:^|\\s)(?:(?:давай\\s+)?поигра(?:ем|ть|й)|сыграем|(?:хочу|давай)\\s+(?:по)?играть|мини[\\s-]?игр\\w*|let'?s\\s+play|play\\s+(?:a\\s+)?game|play\\s+with\\s+me)(?:\\s|$)|^(?:игры|игра|game|games)$", IntentKind.PlayGame);
 		Simple("(?:^|\\s)(?:удиви меня|surprise me|случайн\\w+ тем\\w*|random theme|любую тему)", IntentKind.SurpriseTheme);
 		Add("(?:смени|поменяй|переключи|change|switch)\\s+(?:тему|theme)\\s+(?:на|to)\\s+(?<x>.+)", (Match m, string _) => new Intent(IntentKind.ApplyTheme, Rest(m)));
 		Simple("(?:^|\\s)(?:следующ\\w+|другую|друга\\w|смени|поменяй|next|change|another)\\s+(?:тем[уаы]|theme)(?:\\s|$)", IntentKind.NextTheme);
