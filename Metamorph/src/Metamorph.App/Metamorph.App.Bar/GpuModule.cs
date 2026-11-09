@@ -1,14 +1,11 @@
 using System;
-using System.Threading.Tasks;
-using Metamorph.Core.Services;
+using Metamorph.App.Infrastructure;
 
 namespace Metamorph.App.Bar;
 
 public sealed class GpuModule : LabeledModule
 {
-	private readonly GpuCounter _counter = new GpuCounter();
-
-	private bool _busy;
+	private IDisposable? _lease = SensorHub.Shared.Acquire(gpu: true);
 
 	public override int IntervalTicks => 4;
 
@@ -21,39 +18,38 @@ public sealed class GpuModule : LabeledModule
 		});
 	}
 
-	public override async void Update()
+	public override void Update()
 	{
-		if (_busy)
+		double? gpu = SensorHub.Shared.Current.Gpu;
+		if (gpu.HasValue)
 		{
-			return;
+			double value = gpu.GetValueOrDefault();
+			SetValue($"{value:0}%", (value >= 90.0) ? Context.Alert : null);
+			SetVisible(visible: true);
 		}
-		_busy = true;
-		try
+		else if (!SensorHub.Shared.GpuAvailable)
 		{
-			double? num = await Task.Run((Func<double?>)_counter.Read);
-			if (num.HasValue)
-			{
-				double valueOrDefault = num.GetValueOrDefault();
-				SetValue($"{valueOrDefault:0}%", (valueOrDefault >= 90.0) ? Context.Alert : null);
-				SetVisible(visible: true);
-			}
-			else if (!_counter.Available)
-			{
-				SetVisible(visible: false);
-			}
+			SetVisible(visible: false);
 		}
-		catch (Exception ex)
+	}
+
+	// Счётчик GPU дорогой: пока панель скрыта, отпускаем его.
+	public override void Suspend(bool suspended)
+	{
+		if (suspended)
 		{
-			Log.Error("Модуль gpu", ex);
+			_lease?.Dispose();
+			_lease = null;
 		}
-		finally
+		else
 		{
-			_busy = false;
+			_lease ??= SensorHub.Shared.Acquire(gpu: true);
 		}
 	}
 
 	public override void Dispose()
 	{
-		_counter.Dispose();
+		_lease?.Dispose();
+		_lease = null;
 	}
 }

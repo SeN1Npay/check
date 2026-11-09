@@ -3,19 +3,25 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Metamorph.Core.Desktop;
 using Metamorph.Core.Services;
 
 namespace Metamorph.App.Desktop;
 
 internal sealed class GifAnimation
 {
-	private const long MemoryBudget = 335544320L;
-
 	public IReadOnlyList<BitmapSource> Frames { get; }
 
 	private double[] Ends { get; }
 
 	public double Duration { get; }
+
+	// Сколько кадров склеено (одинаковые подряд) и во сколько раз прорежено ради бюджета памяти.
+	public int Merged { get; }
+
+	public int Step { get; }
+
+	public long Bytes { get; }
 
 	public int PixelWidth
 	{
@@ -41,11 +47,14 @@ internal sealed class GifAnimation
 		}
 	}
 
-	private GifAnimation(IReadOnlyList<BitmapSource> frames, double[] ends)
+	private GifAnimation(IReadOnlyList<BitmapSource> frames, double[] ends, int merged, int step, long bytes)
 	{
 		Frames = frames;
 		Ends = ends;
 		Duration = ((ends.Length != 0) ? ends[^1] : 0.0);
+		Merged = merged;
+		Step = step;
+		Bytes = bytes;
 	}
 
 	public double DelayOf(int index)
@@ -103,120 +112,119 @@ internal sealed class GifAnimation
 		return Frames[Math.Clamp(num, 0, Frames.Count - 1)];
 	}
 
-	public static GifAnimation? Load(string path, int maxWidth)
+	// targetWidth/Height — пиксели самого большого монитора (0 — не уменьшать под монитор).
+	public static GifAnimation? Load(string path, int targetWidth, int targetHeight, long budget = GifFramePlan.DefaultBudget)
 	{
 		try
 		{
 			using FileStream bitmapStream = File.OpenRead(path);
-			GifBitmapDecoder gifBitmapDecoder = new GifBitmapDecoder(bitmapStream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-			if (gifBitmapDecoder.Frames.Count == 0)
+			GifBitmapDecoder decoder = new GifBitmapDecoder(bitmapStream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+			int count = decoder.Frames.Count;
+			if (count == 0)
 			{
 				return null;
 			}
-			ushort? num = Query<ushort>(gifBitmapDecoder.Metadata, "/logscrdesc/Width");
-			int num2;
-			if (num.HasValue)
-			{
-				ushort valueOrDefault = num.GetValueOrDefault();
-				if (valueOrDefault > 0)
-				{
-					num2 = valueOrDefault;
-					goto IL_0060;
-				}
-			}
-			num2 = gifBitmapDecoder.Frames[0].PixelWidth;
-			goto IL_0060;
-			IL_0060:
-			int num3 = num2;
-			num = Query<ushort>(gifBitmapDecoder.Metadata, "/logscrdesc/Height");
-			int num4;
-			if (num.HasValue)
-			{
-				ushort valueOrDefault2 = num.GetValueOrDefault();
-				if (valueOrDefault2 > 0)
-				{
-					num4 = valueOrDefault2;
-					goto IL_009f;
-				}
-			}
-			num4 = gifBitmapDecoder.Frames[0].PixelHeight;
-			goto IL_009f;
-			IL_009f:
-			int num5 = num4;
-			int count = gifBitmapDecoder.Frames.Count;
-			double val = Math.Min(1.0, Math.Sqrt(335544320.0 / ((double)num3 * (double)num5 * 4.0 * (double)count)));
-			if (maxWidth > 0)
-			{
-				val = Math.Min(val, (double)maxWidth / (double)num3);
-			}
-			val = Math.Max(val, 0.1);
-			int[] array = new int[num3 * num5];
-			List<BitmapSource> list = new List<BitmapSource>(count);
-			double[] array2 = new double[count];
-			double num6 = 0.0;
+			int width = Query<ushort>(decoder.Metadata, "/logscrdesc/Width") is ushort w && w > 0 ? w : decoder.Frames[0].PixelWidth;
+			int height = Query<ushort>(decoder.Metadata, "/logscrdesc/Height") is ushort h && h > 0 ? h : decoder.Frames[0].PixelHeight;
+			double scale = GifFramePlan.Scale(width, height, targetWidth, targetHeight, count, budget);
+			(int outWidth, int outHeight) = GifFramePlan.ScaledSize(width, height, scale);
+			bool scaled = outWidth != width || outHeight != height;
+			long frameBytes = GifFramePlan.EstimateBytes(outWidth, outHeight, 1);
+			GifFrameAccumulator<BitmapSource> frames = new GifFrameAccumulator<BitmapSource>(budget);
+			int[] canvas = new int[width * height];
+			int[] scaledPixels = (scaled ? new int[outWidth * outHeight] : canvas);
 			for (int i = 0; i < count; i++)
 			{
-				BitmapFrame bitmapFrame = gifBitmapDecoder.Frames[i];
-				BitmapMetadata meta = bitmapFrame.Metadata as BitmapMetadata;
-				int valueOrDefault3 = Query<ushort>(meta, "/imgdesc/Left").GetValueOrDefault();
-				int valueOrDefault4 = Query<ushort>(meta, "/imgdesc/Top").GetValueOrDefault();
-				double num7 = (double)(int)Query<ushort>(meta, "/grctlext/Delay").GetValueOrDefault(10) / 100.0;
-				if (num7 < 0.02)
+				BitmapFrame frame = decoder.Frames[i];
+				BitmapMetadata? meta = frame.Metadata as BitmapMetadata;
+				int left = Query<ushort>(meta, "/imgdesc/Left").GetValueOrDefault();
+				int top = Query<ushort>(meta, "/imgdesc/Top").GetValueOrDefault();
+				double delay = (double)(int)Query<ushort>(meta, "/grctlext/Delay").GetValueOrDefault(10) / 100.0;
+				if (delay < 0.02)
 				{
-					num7 = 0.1;
+					delay = 0.1;
 				}
-				byte valueOrDefault5 = Query<byte>(meta, "/grctlext/Disposal").GetValueOrDefault();
-				int[] array3 = ((valueOrDefault5 == 3) ? ((int[])array.Clone()) : null);
-				FormatConvertedBitmap formatConvertedBitmap = new FormatConvertedBitmap(bitmapFrame, PixelFormats.Bgra32, null, 0.0);
-				int pixelWidth = formatConvertedBitmap.PixelWidth;
-				int pixelHeight = formatConvertedBitmap.PixelHeight;
-				int[] array4 = new int[pixelWidth * pixelHeight];
-				formatConvertedBitmap.CopyPixels(array4, pixelWidth * 4, 0);
-				for (int j = 0; j < pixelHeight; j++)
+				byte disposal = Query<byte>(meta, "/grctlext/Disposal").GetValueOrDefault();
+				int[]? restore = ((disposal == 3) ? ((int[])canvas.Clone()) : null);
+				// Кадры GIF — дельты: композитим всегда, даже если сам кадр потом выкинем.
+				FormatConvertedBitmap patch = new FormatConvertedBitmap(frame, PixelFormats.Bgra32, null, 0.0);
+				int pw = patch.PixelWidth;
+				int ph = patch.PixelHeight;
+				int[] patchPixels = new int[pw * ph];
+				patch.CopyPixels(patchPixels, pw * 4, 0);
+				for (int y = 0; y < ph; y++)
 				{
-					int num8 = valueOrDefault4 + j;
-					if (num8 < 0 || num8 >= num5)
+					int cy = top + y;
+					if (cy < 0 || cy >= height)
 					{
 						continue;
 					}
-					for (int k = 0; k < pixelWidth; k++)
+					for (int x = 0; x < pw; x++)
 					{
-						int num9 = valueOrDefault3 + k;
-						if (num9 >= 0 && num9 < num3)
+						int cx = left + x;
+						if (cx >= 0 && cx < width)
 						{
-							int num10 = array4[j * pixelWidth + k];
-							if ((uint)num10 >> 24 != 0)
+							int px = patchPixels[y * pw + x];
+							if ((uint)px >> 24 != 0)
 							{
-								array[num8 * num3 + num9] = num10;
+								canvas[cy * width + cx] = px;
 							}
 						}
 					}
 				}
-				BitmapSource bitmapSource = BitmapSource.Create(num3, num5, 96.0, 96.0, PixelFormats.Bgra32, null, array, num3 * 4);
-				if (val < 0.999)
+				if (!frames.Wants(i))
 				{
-					bitmapSource = new WriteableBitmap(new TransformedBitmap(bitmapSource, new ScaleTransform(val, val)));
+					frames.Extend(delay);
 				}
-				bitmapSource.Freeze();
-				list.Add(bitmapSource);
-				num6 = (array2[i] = num6 + num7);
-				if (valueOrDefault5 == 2)
+				else
 				{
-					for (int l = 0; l < pixelHeight; l++)
+					if (scaled)
 					{
-						int num11 = valueOrDefault4 + l;
-						if (num11 >= 0 && num11 < num5)
+						BitmapSource full = BitmapSource.Create(width, height, 96.0, 96.0, PixelFormats.Bgra32, null, canvas, width * 4);
+						TransformedBitmap small = new TransformedBitmap(full, new ScaleTransform((double)outWidth / width, (double)outHeight / height));
+						if (small.PixelWidth != outWidth || small.PixelHeight != outHeight)
 						{
-							Array.Clear(array, num11 * num3 + Math.Max(0, valueOrDefault3), Math.Max(0, Math.Min(pixelWidth, num3 - valueOrDefault3)));
+							outWidth = small.PixelWidth;
+							outHeight = small.PixelHeight;
+							scaledPixels = new int[outWidth * outHeight];
+							frameBytes = GifFramePlan.EstimateBytes(outWidth, outHeight, 1);
+						}
+						small.CopyPixels(scaledPixels, outWidth * 4, 0);
+					}
+					ulong hash = GifFramePlan.Hash(scaledPixels);
+					if (!frames.TryMerge(hash, delay))
+					{
+						BitmapSource bitmap = BitmapSource.Create(outWidth, outHeight, 96.0, 96.0, PixelFormats.Bgra32, null, scaledPixels, outWidth * 4);
+						bitmap.Freeze();
+						frames.Add(bitmap, hash, delay, frameBytes);
+					}
+				}
+				if (disposal == 2)
+				{
+					for (int y = 0; y < ph; y++)
+					{
+						int cy = top + y;
+						if (cy >= 0 && cy < height && left < width)
+						{
+							int from = Math.Max(0, left);
+							Array.Clear(canvas, cy * width + from, Math.Max(0, Math.Min(left + pw, width) - from));
 						}
 					}
 				}
-				else if (array3 != null)
+				else if (restore != null)
 				{
-					array = array3;
+					canvas = restore;
+					if (!scaled)
+					{
+						scaledPixels = canvas;
+					}
 				}
 			}
-			return new GifAnimation(list, array2);
+			if (frames.Decimations > 0)
+			{
+				Log.Warn($"GIF-обои: {Path.GetFileName(path)} не помещается в {budget / 1048576} МБ — оставлен каждый {frames.Step}-й кадр");
+			}
+			return new GifAnimation(new List<BitmapSource>(frames.Frames), GifFramePlan.Ends(frames.Delays), frames.Merged, frames.Step, frames.Bytes);
 		}
 		catch (Exception ex)
 		{
