@@ -304,6 +304,7 @@ public static class IntentParser
 			return (Intent?)null;
 		});
 		Add("(?:^|\\s)(?:тетрис\\w*|tetris)(?:\\s|$)", (Match _, string _) => new Intent(IntentKind.PlayGame, "tetris"));
+		Add("(?:^|\\s)(?:марио|mario|(?:мета[\\s-]?)?платформер\\w*|platformer|meta[\\s-]?quest)(?:\\s|$)", (Match _, string _) => new Intent(IntentKind.PlayGame, "platformer"));
 		Add("(?:^|\\s)(?:динозавр\\w*|дино|(?:мета[\\s-]?)?раннер\\w*|бегалк\\w*|dino(?:saur)?|(?:meta[\\s-]?)?runner)(?:\\s|$)", (Match _, string _) => new Intent(IntentKind.PlayGame, "dino"));
 		Simple("(?:^|\\s)(?:(?:давай\\s+)?поигра(?:ем|ть|й)|сыграем|(?:хочу|давай)\\s+(?:по)?играть|мини[\\s-]?игр\\w*|let'?s\\s+play|play\\s+(?:a\\s+)?game|play\\s+with\\s+me)(?:\\s|$)|^(?:игры|игра|game|games)$", IntentKind.PlayGame);
 		Simple("(?:^|\\s)(?:удиви меня|surprise me|случайн\\w+ тем\\w*|random theme|любую тему)", IntentKind.SurpriseTheme);

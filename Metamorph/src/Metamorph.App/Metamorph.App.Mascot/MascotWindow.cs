@@ -623,10 +623,11 @@ internal sealed class MascotWindow : Window
 		{
 			Header = Loc.T("🎮 Поиграем")
 		};
-		foreach ((string title, string? id) in new (string, string?)[3]
+		foreach ((string title, string? id) in new (string, string?)[4]
 		{
 			(Loc.T("Мета-раннер"), "dino"),
 			(Loc.T("Тетрис"), "tetris"),
+			(Loc.T("Мета-платформер"), "platformer"),
 			(Loc.T("Все игры…"), null)
 		})
 		{
