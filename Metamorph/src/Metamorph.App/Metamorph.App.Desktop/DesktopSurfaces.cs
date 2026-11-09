@@ -2,20 +2,53 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Metamorph.App.Infrastructure;
+using Metamorph.Core.Models;
 using Metamorph.Core.Native;
 using Metamorph.Core.Services;
 
 namespace Metamorph.App.Desktop;
 
+internal sealed record SurfaceTransition(WallpaperTransitionKind Kind, double Seconds)
+{
+	// Прежнее поведение до настроек переходов: короткий fade.
+	public static readonly SurfaceTransition Default = new SurfaceTransition(WallpaperTransitionKind.Fade, 0.35);
+
+	public static SurfaceTransition From(TransitionSettings? s)
+	{
+		if (s == null)
+		{
+			return Default;
+		}
+		double seconds = double.IsFinite(s.Seconds) ? Math.Clamp(s.Seconds, 0.0, 5.0) : Default.Seconds;
+		return new SurfaceTransition(s.Kind, seconds);
+	}
+}
+
 internal static class DesktopSurfaces
 {
 	private static nint _workerW;
 
+	private static volatile SurfaceTransition _transition = SurfaceTransition.Default;
+
 	private static readonly Dictionary<string, DesktopSurface> Surfaces = new Dictionary<string, DesktopSurface>(StringComparer.Ordinal);
 
-	private static readonly HashSet<DesktopSurface> InUse = new HashSet<DesktopSurface>();
+	// Подложку делят анимированные обои и эффекты — считаем пользователей, а не просто «занята».
+	private static readonly Dictionary<DesktopSurface, int> InUse = new Dictionary<DesktopSurface, int>();
 
 	public static nint WorkerW => _workerW;
+
+	// Переход при смене обоев на подложке (из темы: Desktop.Effects.Transition).
+	public static SurfaceTransition Transition
+	{
+		get
+		{
+			return _transition;
+		}
+		set
+		{
+			_transition = value ?? SurfaceTransition.Default;
+		}
+	}
 
 	public static bool LayerAlive
 	{
@@ -59,7 +92,11 @@ internal static class DesktopSurfaces
 		string text = Key(display);
 		if (!Surfaces.TryGetValue(text, out DesktopSurface value) || !value.IsAlive)
 		{
-			value?.Dispose();
+			if (value != null)
+			{
+				InUse.Remove(value);
+				value.Dispose();
+			}
 			value = new DesktopSurface(_workerW, display.Bounds, DesktopLayer.ParentOrigin(_workerW));
 			Surfaces[text] = value;
 			EventTrace.Mark("wallpaper.surface.create", text);
@@ -68,13 +105,31 @@ internal static class DesktopSurfaces
 		{
 			EventTrace.Mark("wallpaper.surface.reuse", text);
 		}
-		InUse.Add(value);
+		InUse[value] = Users(value) + 1;
 		return value;
 	}
 
 	public static void Release(DesktopSurface surface)
 	{
-		InUse.Remove(surface);
+		int users = Users(surface);
+		if (users <= 1)
+		{
+			InUse.Remove(surface);
+		}
+		else
+		{
+			InUse[surface] = users - 1;
+		}
+	}
+
+	// Сколько владельцев держат подложку (вызывать на потоке обоев).
+	public static int Users(DesktopSurface surface)
+	{
+		if (!InUse.TryGetValue(surface, out var value))
+		{
+			return 0;
+		}
+		return value;
 	}
 
 	public static void CloseUnused()
@@ -103,7 +158,7 @@ internal static class DesktopSurfaces
 		int num = 0;
 		foreach (var (key, desktopSurface2) in Surfaces.ToList())
 		{
-			if (!InUse.Contains(desktopSurface2) || !desktopSurface2.IsAlive)
+			if (!InUse.ContainsKey(desktopSurface2) || !desktopSurface2.IsAlive)
 			{
 				InUse.Remove(desktopSurface2);
 				try
@@ -157,6 +212,6 @@ internal static class DesktopSurfaces
 
 	private static string DescribeCore()
 	{
-		return $"workerW=0x{((IntPtr)_workerW).ToInt64():X} alive={LayerAlive} surfaces={Surfaces.Count} inUse={InUse.Count}";
+		return $"workerW=0x{((IntPtr)_workerW).ToInt64():X} alive={LayerAlive} surfaces={Surfaces.Count} inUse={InUse.Count} users={InUse.Values.Sum()} transition={_transition.Kind}/{_transition.Seconds:0.##}s";
 	}
 }
