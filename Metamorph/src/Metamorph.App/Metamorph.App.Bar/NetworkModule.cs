@@ -8,7 +8,7 @@ namespace Metamorph.App.Bar;
 
 public sealed class NetworkModule : LabeledModule
 {
-	private readonly SystemStats _stats = new SystemStats();
+	private IDisposable? _lease = SensorHub.Shared.Acquire();
 
 	private string _name = "";
 
@@ -43,7 +43,8 @@ public sealed class NetworkModule : LabeledModule
 			SetValue(Loc.T("нет сети"), Context.Alert);
 			return;
 		}
-		(double, double)? tuple = _stats.Network();
+		SensorSnapshot s = SensorHub.Shared.Current;
+		(double, double)? tuple = (s.Down.HasValue && s.Up.HasValue) ? (s.Down.Value, s.Up.Value) : null;
 		object obj;
 		if (tuple.HasValue)
 		{
@@ -57,6 +58,25 @@ public sealed class NetworkModule : LabeledModule
 		string text = (string)obj;
 		SetValue((_kind + " " + _name + text).Trim());
 		base.TextView.ToolTip = _name;
+	}
+
+	public override void Suspend(bool suspended)
+	{
+		if (suspended)
+		{
+			_lease?.Dispose();
+			_lease = null;
+		}
+		else
+		{
+			_lease ??= SensorHub.Shared.Acquire();
+		}
+	}
+
+	public override void Dispose()
+	{
+		_lease?.Dispose();
+		_lease = null;
 	}
 
 	private void ReadProfile()
