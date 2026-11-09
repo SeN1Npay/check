@@ -86,10 +86,11 @@ internal sealed class HubPage : GamePage
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Center
 		};
-		_cards = new Card[2]
+		_cards = new Card[3]
 		{
 			BuildCard(GameHub.Dino, Loc.T("Мета-раннер"), Loc.T("Беги, прыгай и пригибайся! Кристаллы, тыквы, летучие мыши — и день сменяет ночь."), 0),
-			BuildCard(GameHub.Tetris, Loc.T("Тетрис"), Loc.T("Классика с SRS, запасом и T-спинами. Мета болеет за тебя рядом со стаканом."), 1)
+			BuildCard(GameHub.Tetris, Loc.T("Тетрис"), Loc.T("Классика с SRS, запасом и T-спинами. Мета болеет за тебя рядом со стаканом."), 1),
+			BuildCard(GameHub.Platformer, Loc.T("Мета-платформер"), Loc.T("Прыгай по блокам, топчи слаймиков и добегай до флага! Четыре мира и бесконечный режим."), 2)
 		};
 		row.Children.Add(_meta);
 		foreach (Card c in _cards)
@@ -109,7 +110,7 @@ internal sealed class HubPage : GamePage
 		SetRow(hint, 2);
 		Children.Add(hint);
 		string? last = GameHub.Scores.LastGame;
-		_selected = last == GameHub.Tetris ? 1 : 0;
+		_selected = last == GameHub.Tetris ? 1 : (last == GameHub.Platformer || last == GameHub.PlatformerEndless ? 2 : 0);
 		Select(_selected, animate: false);
 		_anim.Facing = 1.0;
 		_anim.Play(MascotClip.Wave, restart: true);
@@ -171,6 +172,9 @@ internal sealed class HubPage : GamePage
 			return true;
 		case Key.D2:
 			Play(GameHub.Tetris);
+			return true;
+		case Key.D3:
+			Play(GameHub.Platformer);
 			return true;
 		default:
 			return false;
@@ -235,7 +239,7 @@ internal sealed class HubPage : GamePage
 			_anim.Play(clip, restart: true);
 			_nextClip = clip == MascotClip.Idle ? 4.0 : 2.6;
 		}
-		_anim.LookX = 0.5 + 0.35 * _selected;
+		_anim.LookX = 0.4 + 0.3 * _selected;
 		_anim.LookY = 0.15;
 		MascotPose pose = _anim.Update(dt);
 		double s = 0.98;
@@ -257,6 +261,10 @@ internal sealed class HubPage : GamePage
 			{
 				DrawRunnerArt(dc, w, h);
 			}
+			else if (id == GameHub.Platformer)
+			{
+				PlatformerArt.DrawCard(dc, Pal, w, h);
+			}
 			else
 			{
 				DrawTetrisArt(dc, w, h);
@@ -270,7 +278,7 @@ internal sealed class HubPage : GamePage
 		{
 			Facing = 1.0
 		};
-		a.Play(id == GameHub.Dino ? MascotClip.Jump : MascotClip.Happy, restart: true);
+		a.Play(id == GameHub.Tetris ? MascotClip.Happy : MascotClip.Jump, restart: true);
 		MascotPose pose = a.Update(0.05);
 		for (int i = 0; i < 6; i++)
 		{
@@ -281,6 +289,10 @@ internal sealed class HubPage : GamePage
 		{
 			mini.SetShadow(new Point(74.0, 138.0), 30.0, 0.7);
 			mini.SetItems(MascotRig.Render(pose, _colors, Affine.Scale(0.44, 0.44).Then(Affine.Translate(74.0, 112.0))));
+		}
+		else if (id == GameHub.Platformer)
+		{
+			mini.SetItems(MascotRig.Render(pose, _colors, Affine.Scale(0.3, 0.3).Then(Affine.Translate(78.0, 98.0))));
 		}
 		else
 		{
