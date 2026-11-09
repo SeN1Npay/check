@@ -1,17 +1,11 @@
 using System;
-using Metamorph.Core.Native;
+using Metamorph.App.Infrastructure;
 
 namespace Metamorph.App.Bar;
 
 public sealed class CpuModule : LabeledModule
 {
-	private long _idle;
-
-	private long _kernel;
-
-	private long _user;
-
-	private bool _hasSample;
+	private IDisposable? _lease = SensorHub.Shared.Acquire();
 
 	public CpuModule(BarContext context)
 		: base(context, "cpu")
@@ -21,25 +15,31 @@ public sealed class CpuModule : LabeledModule
 
 	public override void Update()
 	{
-		if (!NativeMethods.GetSystemTimes(out var idleTime, out var kernelTime, out var userTime))
+		double? cpu = SensorHub.Shared.Current.Cpu;
+		if (cpu.HasValue)
 		{
-			return;
+			double value = cpu.GetValueOrDefault();
+			SetValue($"{value,3:0}%", (value >= 90.0) ? Context.Alert : null);
 		}
-		if (_hasSample)
+	}
+
+	// Панель скрыта — отпускаем общий опрос (если больше никому не нужен, он остановится).
+	public override void Suspend(bool suspended)
+	{
+		if (suspended)
 		{
-			long num = kernelTime - _kernel + (userTime - _user);
-			if (num > 0)
-			{
-				double num2 = Math.Clamp(100.0 * (double)(num - (idleTime - _idle)) / (double)num, 0.0, 100.0);
-				SetValue($"{num2,3:0}%", (num2 >= 90.0) ? Context.Alert : null);
-			}
+			_lease?.Dispose();
+			_lease = null;
 		}
-		long idle = idleTime;
-		long kernel = kernelTime;
-		long user = userTime;
-		_idle = idle;
-		_kernel = kernel;
-		_user = user;
-		_hasSample = true;
+		else
+		{
+			_lease ??= SensorHub.Shared.Acquire();
+		}
+	}
+
+	public override void Dispose()
+	{
+		_lease?.Dispose();
+		_lease = null;
 	}
 }
