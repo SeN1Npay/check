@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Metamorph.App.Games;
 using Metamorph.App.Infrastructure;
 using Metamorph.App.Launcher;
 using Metamorph.Core.Assistant;
@@ -234,5 +235,20 @@ internal sealed class AssistantHost : IAssistantHost
 	public void ShowLauncher()
 	{
 		_app.ShowLauncher();
+	}
+
+	public void PlayGame(string? game)
+	{
+		_app.Dispatcher.BeginInvoke((Action)delegate
+		{
+			try
+			{
+				GameHub.Show(_app, game);
+			}
+			catch (Exception ex)
+			{
+				Log.Error("Игры: не удалось открыть из помощника", ex);
+			}
+		});
 	}
 }
