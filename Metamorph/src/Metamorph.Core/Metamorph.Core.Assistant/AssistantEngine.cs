@@ -54,7 +54,7 @@ public sealed class AssistantEngine
 		bool llmOn = assistantSettings.Llm.Enabled && _llm() != null;
 		if (intent.Kind != 0)
 		{
-			if (flag && intent.IsLocalOnly)
+			if (flag && (intent.IsLocalOnly || intent.Kind == IntentKind.PlayGame))
 			{
 				return new AssistantReply(Loc.T("Это я могу сделать только на самом компьютере."), intent.Kind, MascotAction.Think);
 			}
@@ -255,6 +255,14 @@ public sealed class AssistantEngine
 		case IntentKind.Launcher:
 			_host.ShowLauncher();
 			return new AssistantReply(Loc.T("Открыла лаунчер."), intent.Kind);
+		case IntentKind.PlayGame:
+			_host.PlayGame(intent.Text);
+			return new AssistantReply(intent.Text switch
+			{
+				"tetris" => Pick("Тетрис! Чур, я подсказываю, куда ставить палку!", "Обожаю тетрис! Сложи мне четыре линии разом~", "Тетрис-тетрис! Посмотрим, кто дольше продержится."),
+				"dino" => Pick("Бежим! Я прыгаю — ты жмёшь пробел!", "Мета-раннер! Не дай мне врезаться в кристалл~", "На старт… внимание… бежим!"),
+				_ => Pick("Ура, поиграем! Выбирай игру~", "Давай! Я уже размялась!", "Игры! Самое лучшее предложение за сегодня!")
+			}, intent.Kind, MascotAction.Happy);
 		default:
 			return null;
 		}
@@ -304,6 +312,7 @@ public sealed class AssistantEngine
 		{
 			list.Add(new LlmTool("open_app", "Launch an installed application by name.", Obj(new(string, string, string)[1] { ("name", "string", "App name, e.g. Notepad, Spotify") })));
 			list.Add(new LlmTool("web_search", "Open a web search in the browser.", Obj(new(string, string, string)[1] { ("query", "string", "Search query") })));
+			list.Add(new LlmTool("play_game", "Open a mini-game starring you (the mascot): \"dino\" (runner like the Chrome dino), \"tetris\", or \"menu\" for the game picker.", Obj(new(string, string, string)[1] { ("game", "string", "dino | tetris | menu") })));
 		}
 		return list;
 		static JsonObject Obj((string Name, string Type, string Desc)[] props)
@@ -485,6 +494,16 @@ public sealed class AssistantEngine
 					string text2 = Str("name").Trim();
 					AssistantReply assistantReply = await ExecuteAsync((text2.Equals("next", StringComparison.OrdinalIgnoreCase) || text2.Length == 0) ? new Intent(IntentKind.NextWallpaper) : new Intent(IntentKind.SetWallpaper, text2));
 					return ((object)assistantReply == null) ? (Result: "error: wallpaper not found. Available: " + string.Join(", ", _host.WallpaperNames), Mood: (MascotAction?)null) : (Result: "ok: " + assistantReply.Text, Mood: MascotAction.Happy);
+				}
+				case 9:
+				{
+					if (!(name == "play_game") || source != 0)
+					{
+						break;
+					}
+					string game = Str("game").Trim().ToLowerInvariant();
+					_host.PlayGame(game.Contains("tetris") ? "tetris" : (game.Contains("dino") || game.Contains("run") ? "dino" : null));
+					return (Result: "ok: game window opened", Mood: MascotAction.Happy);
 				}
 				case 5:
 				{
