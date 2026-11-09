@@ -28,6 +28,9 @@ internal sealed class WallpaperSession : IDisposable
 
 	public bool HasSlides => _images.Count > 1;
 
+	// Слайд-шоу/обои по времени суток сменили картинку (UI-поток) — эффекты перечитывают обои.
+	public static event Action? ImageChanged;
+
 	public bool IsAnimated => _animated != null;
 
 	public bool ManualPause
@@ -69,6 +72,7 @@ internal sealed class WallpaperSession : IDisposable
 
 	public void Start()
 	{
+		DesktopSurfaces.Transition = SurfaceTransition.From(_profile.Desktop?.Effects?.Transition);
 		WallpaperSettings wallpaper = _profile.Wallpaper;
 		switch (wallpaper.EffectiveKind)
 		{
@@ -128,6 +132,7 @@ internal sealed class WallpaperSession : IDisposable
 			if (File.Exists(_images[_index]))
 			{
 				WallpaperService.SetWallpaper(_images[_index], _profile.Wallpaper.Style);
+				RaiseImageChanged();
 			}
 		}
 		catch (Exception ex)
@@ -145,6 +150,7 @@ internal sealed class WallpaperSession : IDisposable
 			if (wallpaperScheduleEntry != null)
 			{
 				_services.Wallpapers.ApplyScheduleEntry(_profile, wallpaperScheduleEntry, Resolve(wallpaperScheduleEntry.Path));
+				RaiseImageChanged();
 			}
 		}
 		catch (Exception ex)
@@ -165,6 +171,18 @@ internal sealed class WallpaperSession : IDisposable
 				_timer.Interval = ((timeSpan < TimeSpan.FromSeconds(5.0)) ? TimeSpan.FromSeconds(5.0) : (timeSpan + TimeSpan.FromSeconds(1.0)));
 				_timer.Start();
 			}
+		}
+	}
+
+	private static void RaiseImageChanged()
+	{
+		try
+		{
+			WallpaperSession.ImageChanged?.Invoke();
+		}
+		catch (Exception ex)
+		{
+			Log.Error("Обои: подписчик смены картинки", ex);
 		}
 	}
 
