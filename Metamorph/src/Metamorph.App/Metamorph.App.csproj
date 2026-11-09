@@ -61,7 +61,7 @@
   </UsingTask>
 
   <Target Name="PackBaml" BeforeTargets="PrepareForBuild" Inputs="@(BamlResource)" Outputs="$(IntermediateOutputPath)Metamorph.g.resources">
-    <WriteGResources Files="@(BamlResource)" BaseDir="$(MSBuildProjectDirectory)/Baml" Output="$(MSBuildProjectDirectory)/$(IntermediateOutputPath)Metamorph.g.resources" />
+    <WriteGResources Files="@(BamlResource)" BaseDir="$(MSBuildProjectDirectory)/Baml" Output="$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(IntermediateOutputPath)))Metamorph.g.resources" />
   </Target>
 
   <ItemGroup>

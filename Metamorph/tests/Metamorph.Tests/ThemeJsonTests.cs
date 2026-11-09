@@ -53,16 +53,13 @@ public class ThemeJsonTests
 
 internal static class TestPaths
 {
-	public static string Themes
+	public static string Root => Find();
+
+	public static string Themes => System.IO.Path.Combine(Root, "themes");
+
+	private static string Find([System.Runtime.CompilerServices.CallerFilePath] string here = "")
 	{
-		get
-		{
-			string dir = System.AppContext.BaseDirectory;
-			while (dir != null && !System.IO.Directory.Exists(System.IO.Path.Combine(dir, "themes")))
-			{
-				dir = System.IO.Path.GetDirectoryName(dir)!;
-			}
-			return System.IO.Path.Combine(dir!, "themes");
-		}
+		// tests/Metamorph.Tests/<file>.cs → корень репозитория Metamorph/
+		return System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(here)!, "..", ".."));
 	}
 }
