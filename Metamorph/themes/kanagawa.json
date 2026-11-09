@@ -1,0 +1,100 @@
+{
+  "id": "kanagawa",
+  "name": "Kanagawa",
+  "description": "По мотивам «Большой волны в Канагаве» Хокусая: тушь, индиго и осенние акценты.",
+  "author": "Metamorph",
+  "mode": "dark",
+  "palette": {
+    "background": "#1F1F28",
+    "surface": "#2A2A37",
+    "foreground": "#DCD7BA",
+    "muted": "#727169",
+    "accent": "#7E9CD8",
+    "accent2": "#957FB8",
+    "red": "#E82424",
+    "green": "#98BB6C",
+    "yellow": "#E6C384"
+  },
+  "wallpaper": {
+    "kind": "gradient",
+    "from": "#16161D",
+    "to": "#363646",
+    "direction": "diagonal",
+    "style": "fill"
+  },
+  "system": {
+    "transparency": true,
+    "accentOnTaskbar": true,
+    "accentOnTitleBars": true
+  },
+  "taskbar": {
+    "mode": "autoHide",
+    "style": "transparent"
+  },
+  "bar": {
+    "enabled": true,
+    "position": "bottom",
+    "height": 28,
+    "opacity": 0.85,
+    "blur": true,
+    "fontFamily": "JetBrains Mono, Cascadia Mono, Consolas",
+    "fontSize": 13,
+    "clockFormat": "ddd dd MMM  HH:mm",
+    "left": [
+      "workspaces",
+      "window"
+    ],
+    "center": [
+      "media"
+    ],
+    "right": [
+      "volume",
+      "bluetooth",
+      "network",
+      "battery",
+      "clock",
+      "tray"
+    ],
+    "style": "islands"
+  },
+  "dock": {
+    "enabled": false,
+    "position": "bottom",
+    "behavior": "dodgeWindows",
+    "style": "pill",
+    "iconSize": 48,
+    "hoverEffect": "magnify",
+    "magnification": 1.9,
+    "magnifyRange": 2.5,
+    "spacing": 8,
+    "padding": 9,
+    "margin": 8,
+    "cornerRadius": 18,
+    "opacity": 0.8,
+    "indicator": "dots",
+    "bounceOnLaunch": true,
+    "bounceOnAttention": true,
+    "showLabels": true,
+    "showAppsButton": true,
+    "showTrash": true,
+    "showRunningApps": true,
+    "animationSpeed": 1.0
+  },
+  "windows": {
+    "activeBorder": {
+      "enabled": true,
+      "width": 2,
+      "gradient": true,
+      "radius": 8
+    },
+    "tiling": {
+      "hotkeys": true,
+      "gaps": 10,
+      "masterRatio": 0.55,
+      "engine": "none"
+    }
+  },
+  "sounds": {
+    "scheme": "silent"
+  }
+}

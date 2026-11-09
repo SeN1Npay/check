@@ -1,0 +1,81 @@
+{
+  "id": "nord",
+  "name": "Nord",
+  "description": "Арктическая палитра: холодные синие тона, спокойный минимализм.",
+  "author": "Metamorph",
+  "mode": "dark",
+  "palette": {
+    "background": "#2E3440",
+    "surface": "#3B4252",
+    "foreground": "#ECEFF4",
+    "muted": "#4C566A",
+    "accent": "#88C0D0",
+    "accent2": "#81A1C1",
+    "red": "#BF616A",
+    "green": "#A3BE8C",
+    "yellow": "#EBCB8B"
+  },
+  "wallpaper": {
+    "kind": "gradient",
+    "from": "#2E3440",
+    "to": "#4C566A",
+    "direction": "diagonal",
+    "style": "fill"
+  },
+  "system": {
+    "transparency": true,
+    "accentOnTaskbar": true,
+    "accentOnTitleBars": true
+  },
+  "taskbar": {
+    "mode": "hidden"
+  },
+  "bar": {
+    "enabled": true,
+    "position": "top",
+    "height": 28,
+    "opacity": 0.85,
+    "blur": true,
+    "fontFamily": "JetBrains Mono, Cascadia Mono, Consolas",
+    "fontSize": 13,
+    "clockFormat": "ddd dd MMM  HH:mm",
+    "left": [
+      "launcher",
+      "window"
+    ],
+    "center": [
+      "clock"
+    ],
+    "right": [
+      "layout",
+      "cpu",
+      "ram",
+      "battery",
+      "uptime",
+      "tray"
+    ]
+  },
+  "dock": {
+    "enabled": true,
+    "position": "bottom",
+    "behavior": "dodgeWindows",
+    "style": "flat",
+    "iconSize": 48,
+    "hoverEffect": "magnify",
+    "magnification": 1.6,
+    "magnifyRange": 2.5,
+    "spacing": 8,
+    "padding": 9,
+    "margin": 8,
+    "cornerRadius": 14,
+    "opacity": 0.86,
+    "indicator": "line",
+    "bounceOnLaunch": true,
+    "bounceOnAttention": true,
+    "showLabels": true,
+    "showAppsButton": true,
+    "showTrash": true,
+    "showRunningApps": true,
+    "animationSpeed": 1.0
+  }
+}

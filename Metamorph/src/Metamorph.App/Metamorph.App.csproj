@@ -1,0 +1,70 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Metamorph</AssemblyName>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <Version>1.4.0</Version>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <LangVersion>latest</LangVersion>
+    <Nullable>annotations</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <RootNamespace />
+    <!-- Код восстановлен декомпиляцией: шумные предупреждения отключены. -->
+    <NoWarn>$(NoWarn);CS0168;CS0219;CS0162;CS0414;CS0649;CS0067;CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS8629;CA1416;SYSLIB0014;WFAC010</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Metamorph.Core/Metamorph.Core.csproj" />
+    <PackageReference Include="ManagedShell" Version="0.0.374" />
+    <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
+  </ItemGroup>
+
+  <!--
+    Исходный XAML утерян; скомпилированный BAML лежит в Baml/ и упаковывается обратно в Metamorph.g.resources,
+    откуда его читает Application.LoadComponent("/Metamorph;component/....xaml").
+  -->
+  <ItemGroup>
+    <BamlResource Include="Baml/**/*" />
+    <None Remove="Baml/**/*" />
+  </ItemGroup>
+
+  <UsingTask TaskName="WriteGResources" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <Files ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <BaseDir ParameterType="System.String" Required="true" />
+      <Output ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Resources" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        Directory.CreateDirectory(Path.GetDirectoryName(Output));
+        using (var w = new ResourceWriter(Output))
+        {
+          foreach (var f in Files)
+          {
+            var full = Path.GetFullPath(f.ItemSpec);
+            var key = (f.GetMetadata("RecursiveDir") + f.GetMetadata("Filename") + f.GetMetadata("Extension")).Replace('\\', '/').ToLowerInvariant();
+            w.AddResource(key, new MemoryStream(File.ReadAllBytes(full)), true);
+          }
+        }
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="PackBaml" BeforeTargets="PrepareForBuild" Inputs="@(BamlResource)" Outputs="$(IntermediateOutputPath)Metamorph.g.resources">
+    <WriteGResources Files="@(BamlResource)" BaseDir="$(MSBuildProjectDirectory)/Baml" Output="$(MSBuildProjectDirectory)/$(IntermediateOutputPath)Metamorph.g.resources" />
+  </Target>
+
+  <ItemGroup>
+    <EmbeddedResource Include="$(IntermediateOutputPath)Metamorph.g.resources" LogicalName="Metamorph.g.resources" WithCulture="false" />
+  </ItemGroup>
+</Project>

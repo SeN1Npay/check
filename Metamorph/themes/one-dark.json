@@ -1,0 +1,96 @@
+{
+  "id": "one-dark",
+  "name": "One Dark",
+  "description": "Тема редактора Atom: нейтральный графит и сочные акценты. Панель на всех мониторах, тема для Terminal и VS Code.",
+  "author": "Metamorph",
+  "mode": "dark",
+  "palette": {
+    "background": "#282C34",
+    "surface": "#3E4451",
+    "foreground": "#ABB2BF",
+    "muted": "#5C6370",
+    "accent": "#61AFEF",
+    "accent2": "#C678DD",
+    "red": "#E06C75",
+    "green": "#98C379",
+    "yellow": "#E5C07B"
+  },
+  "wallpaper": {
+    "kind": "gradient",
+    "from": "#21252B",
+    "to": "#3E4451",
+    "direction": "vertical",
+    "style": "fill"
+  },
+  "system": {
+    "transparency": true,
+    "accentOnTaskbar": true,
+    "accentOnTitleBars": true
+  },
+  "taskbar": {
+    "mode": "hidden"
+  },
+  "bar": {
+    "enabled": true,
+    "position": "top",
+    "height": 28,
+    "opacity": 0.85,
+    "blur": true,
+    "fontFamily": "JetBrains Mono, Cascadia Mono, Consolas",
+    "fontSize": 13,
+    "clockFormat": "ddd dd MMM  HH:mm",
+    "left": [
+      "launcher",
+      "workspaces",
+      "window"
+    ],
+    "center": [
+      "clock"
+    ],
+    "right": [
+      "weather",
+      "cpu",
+      "ram",
+      "network",
+      "volume",
+      "layout",
+      "tray"
+    ],
+    "style": "solid",
+    "screens": "all"
+  },
+  "dock": {
+    "enabled": true,
+    "position": "bottom",
+    "behavior": "dodgeWindows",
+    "style": "pill",
+    "iconSize": 48,
+    "hoverEffect": "magnify",
+    "magnification": 1.9,
+    "magnifyRange": 2.5,
+    "spacing": 8,
+    "padding": 9,
+    "margin": 8,
+    "cornerRadius": 18,
+    "opacity": 0.8,
+    "indicator": "dots",
+    "bounceOnLaunch": true,
+    "bounceOnAttention": true,
+    "showLabels": true,
+    "showAppsButton": true,
+    "showTrash": true,
+    "showRunningApps": true,
+    "animationSpeed": 1.0,
+    "screens": "primary",
+    "blur": true
+  },
+  "apps": {
+    "windowsTerminal": true,
+    "vsCode": true,
+    "ohMyPosh": false
+  },
+  "cursors": {
+    "style": "accent",
+    "size": 32
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "id": "tokyo-night",
+  "name": "Tokyo Night",
+  "description": "Неоновый ночной Токио: глубокий синий и яркие акценты.",
+  "author": "Metamorph",
+  "mode": "dark",
+  "palette": {
+    "background": "#1A1B26",
+    "surface": "#24283B",
+    "foreground": "#C0CAF5",
+    "muted": "#565F89",
+    "accent": "#7AA2F7",
+    "accent2": "#BB9AF7",
+    "red": "#F7768E",
+    "green": "#9ECE6A",
+    "yellow": "#E0AF68"
+  },
+  "wallpaper": {
+    "kind": "gradient",
+    "from": "#16161E",
+    "to": "#2F3549",
+    "direction": "vertical",
+    "style": "fill"
+  },
+  "system": {
+    "transparency": true,
+    "accentOnTaskbar": true,
+    "accentOnTitleBars": true
+  },
+  "taskbar": {
+    "mode": "hidden"
+  },
+  "bar": {
+    "enabled": true,
+    "position": "top",
+    "height": 28,
+    "opacity": 0.85,
+    "blur": true,
+    "fontFamily": "JetBrains Mono, Cascadia Mono, Consolas",
+    "fontSize": 13,
+    "clockFormat": "ddd dd MMM  HH:mm",
+    "left": [
+      "launcher",
+      "window"
+    ],
+    "center": [
+      "clock"
+    ],
+    "right": [
+      "layout",
+      "cpu",
+      "ram",
+      "battery",
+      "uptime",
+      "tray"
+    ]
+  },
+  "dock": {
+    "enabled": true,
+    "position": "bottom",
+    "behavior": "dodgeWindows",
+    "style": "pill",
+    "iconSize": 48,
+    "hoverEffect": "magnify",
+    "magnification": 1.9,
+    "magnifyRange": 2.5,
+    "spacing": 8,
+    "padding": 9,
+    "margin": 8,
+    "cornerRadius": 18,
+    "opacity": 0.8,
+    "indicator": "dots",
+    "bounceOnLaunch": true,
+    "bounceOnAttention": true,
+    "showLabels": true,
+    "showAppsButton": true,
+    "showTrash": true,
+    "showRunningApps": true,
+    "animationSpeed": 1.0
+  },
+  "island": {
+    "enabled": true,
+    "idle": "hidden",
+    "albumArt": true,
+    "visualizer": true,
+    "expandOnHover": true
+  }
+}
