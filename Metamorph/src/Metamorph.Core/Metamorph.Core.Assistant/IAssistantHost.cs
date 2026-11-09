@@ -51,4 +51,7 @@ public interface IAssistantHost
 	void ShowIsland();
 
 	void ShowLauncher();
+
+	// game: null — окно выбора, "dino" | "tetris" — сразу игра.
+	void PlayGame(string? game);
 }
