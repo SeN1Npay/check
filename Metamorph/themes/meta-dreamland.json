@@ -1,0 +1,140 @@
+{
+  "id": "meta-dreamland",
+  "name": "Meta Dreamland",
+  "description": "Витрина Metamorph 1.5: плавающая панель, стеклянные карточки, лепестки сакуры, визуализатор музыки, параллакс и тонировка по времени суток.",
+  "author": "Metamorph",
+  "mode": "dark",
+  "palette": {
+    "background": "#1E1E2E",
+    "surface": "#313244",
+    "foreground": "#CDD6F4",
+    "muted": "#6C7086",
+    "accent": "#CBA6F7",
+    "accent2": "#89B4FA",
+    "red": "#F38BA8",
+    "green": "#A6E3A1",
+    "yellow": "#F9E2AF"
+  },
+  "wallpaper": {
+    "kind": "gradient",
+    "from": "#11111B",
+    "to": "#313244",
+    "direction": "radial",
+    "style": "fill"
+  },
+  "system": {
+    "transparency": true,
+    "accentOnTaskbar": true,
+    "accentOnTitleBars": true
+  },
+  "taskbar": {
+    "mode": "hidden"
+  },
+  "bar": {
+    "enabled": true,
+    "position": "top",
+    "height": 30,
+    "opacity": 0.9,
+    "blur": true,
+    "fontFamily": "JetBrains Mono, Cascadia Mono, Consolas",
+    "fontSize": 13,
+    "clockFormat": "ddd dd MMM  HH:mm",
+    "left": [
+      "launcher",
+      "window"
+    ],
+    "center": [
+      "clock"
+    ],
+    "right": [
+      "cava",
+      "layout",
+      "cpu",
+      "ram",
+      "battery",
+      "uptime",
+      "tray"
+    ],
+    "style": "floating",
+    "animations": true
+  },
+  "dock": {
+    "enabled": true,
+    "position": "bottom",
+    "behavior": "alwaysVisible",
+    "style": "glass",
+    "iconSize": 48,
+    "hoverEffect": "magnify",
+    "magnification": 1.8,
+    "magnifyRange": 2.5,
+    "spacing": 8,
+    "padding": 9,
+    "margin": 8,
+    "cornerRadius": 20,
+    "opacity": 0.72,
+    "indicator": "dot",
+    "bounceOnLaunch": true,
+    "bounceOnAttention": true,
+    "showLabels": true,
+    "showAppsButton": true,
+    "showTrash": true,
+    "showRunningApps": true,
+    "animationSpeed": 1.0
+  },
+  "island": {
+    "enabled": true,
+    "idle": "dot",
+    "albumArt": true,
+    "visualizer": true,
+    "expandOnHover": true,
+    "dodgeWindows": true
+  },
+  "desktop": {
+    "cards": {
+      "enabled": true,
+      "preset": "dashboard",
+      "glass": true,
+      "clockStyle": "modern"
+    },
+    "effects": {
+      "visualizer": {
+        "enabled": true,
+        "style": "mirror",
+        "placement": "bottom",
+        "bars": 72,
+        "height": 120,
+        "opacity": 0.5,
+        "gradient": true
+      },
+      "particles": {
+        "enabled": true,
+        "kind": "sakura",
+        "density": 0.8,
+        "speed": 1.0,
+        "mouseInteraction": true
+      },
+      "parallax": {
+        "enabled": true,
+        "strength": 16
+      },
+      "transition": {
+        "kind": "fade",
+        "seconds": 0.9
+      },
+      "timeTint": {
+        "enabled": true,
+        "strength": 0.2
+      },
+      "accentFromWallpaper": false,
+      "maxFps": 30
+    },
+    "hotCorners": {
+      "enabled": true,
+      "topLeft": "taskView",
+      "bottomLeft": "showDesktop",
+      "topRight": "games",
+      "bottomRight": "none",
+      "delayMs": 250
+    }
+  }
+}

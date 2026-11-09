@@ -53,7 +53,25 @@ internal sealed class DesktopWidgetWindow : Window
 		Interval = TimeSpan.FromSeconds(1.0)
 	};
 
-	private readonly SystemStats _stats = new SystemStats();
+	private enum RunMode
+	{
+		Idle,
+		Running,
+		Slow,
+		Stopped
+	}
+
+	// Пока виджет стоит (монитор закрыт окном) — изредка проверяем, не открылся ли он снова.
+	private readonly DispatcherTimer _watch = new DispatcherTimer(DispatcherPriority.Background)
+	{
+		Interval = TimeSpan.FromSeconds(2.0)
+	};
+
+	private bool _needsSensors;
+
+	private IDisposable? _lease;
+
+	private RunMode _mode;
 
 	private readonly List<Action> _updaters = new List<Action>();
 
@@ -128,13 +146,27 @@ internal sealed class DesktopWidgetWindow : Window
 		}
 		_timer.Tick += delegate
 		{
+			if (_mode == RunMode.Running && DesktopActivity.IsCovered(Display.PrimaryDisplay))
+			{
+				Evaluate();
+				return;
+			}
 			Tick();
+			if (_mode == RunMode.Slow)
+			{
+				_timer.Interval = UntilNextMinute();
+			}
+		};
+		_watch.Tick += delegate
+		{
+			Evaluate();
 		};
 		base.Loaded += delegate
 		{
 			Tick();
 			Position();
-			_timer.Start();
+			DesktopActivity.Changed += OnActivityChanged;
+			Evaluate();
 		};
 		base.SizeChanged += delegate
 		{
@@ -243,7 +275,7 @@ internal sealed class DesktopWidgetWindow : Window
 				stack.Children.Add(Row("cpu", out TextBlock v, out Border bar));
 				_updaters.Add(delegate
 				{
-					double? num = _stats.Cpu();
+					double? num = SensorHub.Shared.Current.Cpu;
 					if (num.HasValue)
 					{
 						double valueOrDefault = num.GetValueOrDefault();
@@ -264,12 +296,11 @@ internal sealed class DesktopWidgetWindow : Window
 				{
 					if (_tick % 2 == 0L)
 					{
-						(double, double, uint)? tuple = SystemStats.Memory();
-						if (tuple.HasValue)
+						SensorSnapshot s = SensorHub.Shared.Current;
+						if (s.RamUsedGb.HasValue && s.RamTotalGb.HasValue)
 						{
-							(double, double, uint) valueOrDefault2 = tuple.GetValueOrDefault();
-							v2.Text = $"{valueOrDefault2.Item1:0.0}/{valueOrDefault2.Item2:0}G";
-							SetBar(bar2, valueOrDefault2.Item3);
+							v2.Text = $"{s.RamUsedGb.Value:0.0}/{s.RamTotalGb.Value:0}G";
+							SetBar(bar2, s.RamLoad.GetValueOrDefault());
 						}
 					}
 				});
@@ -289,7 +320,8 @@ internal sealed class DesktopWidgetWindow : Window
 				stack.Children.Add(Row("net", out TextBlock v4));
 				_updaters.Add(delegate
 				{
-					(double, double)? tuple3 = _stats.Network();
+					SensorSnapshot s = SensorHub.Shared.Current;
+					(double, double)? tuple3 = (s.Down.HasValue && s.Up.HasValue) ? (s.Down.Value, s.Up.Value) : null;
 					if (tuple3.HasValue)
 					{
 						(double, double) valueOrDefault4 = tuple3.GetValueOrDefault();
@@ -540,9 +572,80 @@ internal sealed class DesktopWidgetWindow : Window
 		return IntPtr.Zero;
 	}
 
+	private void OnActivityChanged()
+	{
+		base.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(Evaluate));
+	}
+
+	private static TimeSpan UntilNextMinute()
+	{
+		DateTime now = DateTime.Now;
+		return TimeSpan.FromSeconds(60 - now.Second) - TimeSpan.FromMilliseconds(now.Millisecond) + TimeSpan.FromMilliseconds(50.0);
+	}
+
+	// Блокировка — полная остановка; монитор закрыт окном — стоим и раз в 2 с проверяем;
+	// удалённый сеанс / экономия заряда — раз в минуту (часы показывают только минуты), без опроса датчиков.
+	private void Evaluate()
+	{
+		if (_mode == RunMode.Idle && !base.IsLoaded)
+		{
+			return;
+		}
+		RunMode mode = (DesktopActivity.Locked ? RunMode.Stopped : (DesktopActivity.IsCovered(Display.PrimaryDisplay) ? RunMode.Stopped : ((DesktopActivity.Remote || DesktopActivity.EnergySaver) ? RunMode.Slow : RunMode.Running)));
+		if (mode == _mode)
+		{
+			return;
+		}
+		RunMode previous = _mode;
+		_mode = mode;
+		EventTrace.Mark("widget.mode", mode.ToString());
+		_timer.Stop();
+		if (mode == RunMode.Running && _needsSensors)
+		{
+			_lease ??= SensorHub.Shared.Acquire();
+		}
+		else
+		{
+			_lease?.Dispose();
+			_lease = null;
+		}
+		switch (mode)
+		{
+		case RunMode.Running:
+			_watch.Stop();
+			if (previous != RunMode.Idle)
+			{
+				Tick();
+			}
+			_timer.Interval = TimeSpan.FromSeconds(1.0);
+			_timer.Start();
+			break;
+		case RunMode.Slow:
+			_watch.Stop();
+			Tick();
+			_timer.Interval = UntilNextMinute();
+			_timer.Start();
+			break;
+		default:
+			if (DesktopActivity.Locked)
+			{
+				_watch.Stop();
+			}
+			else
+			{
+				_watch.Start();
+			}
+			break;
+		}
+	}
+
 	protected override void OnClosed(EventArgs e)
 	{
+		DesktopActivity.Changed -= OnActivityChanged;
 		_timer.Stop();
+		_watch.Stop();
+		_lease?.Dispose();
+		_lease = null;
 		base.OnClosed(e);
 	}
 }
