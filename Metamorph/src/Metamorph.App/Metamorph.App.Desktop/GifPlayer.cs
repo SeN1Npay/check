@@ -24,7 +24,8 @@ internal sealed class GifPlayer : IDisposable
 
 	private bool _disposed;
 
-	public GifPlayer(string path, int maxWidth)
+	// targetWidth/Height — размер самого большого монитора в пикселях (0 — без уменьшения).
+	public GifPlayer(string path, int targetWidth, int targetHeight)
 	{
 		string path2 = path;
 		GifPlayer gifPlayer = this;
@@ -34,7 +35,7 @@ internal sealed class GifPlayer : IDisposable
 			gifPlayer.Advance();
 		};
 		TaskScheduler scheduler = TaskScheduler.FromCurrentSynchronizationContext();
-		Task.Run(() => GifAnimation.Load(path2, maxWidth)).ContinueWith(delegate(Task<GifAnimation> t)
+		Task.Run(() => GifAnimation.Load(path2, targetWidth, targetHeight)).ContinueWith(delegate(Task<GifAnimation> t)
 		{
 			if (!gifPlayer._disposed)
 			{
@@ -50,7 +51,7 @@ internal sealed class GifPlayer : IDisposable
 						return;
 					}
 				}
-				EventTrace.Mark("wallpaper.gif.loaded", $"{gifPlayer._name} {gifPlayer._animation.Frames.Count} frames {gifPlayer._animation.PixelWidth}x{gifPlayer._animation.PixelHeight}");
+				EventTrace.Mark("wallpaper.gif.loaded", $"{gifPlayer._name} {gifPlayer._animation.Frames.Count} frames {gifPlayer._animation.PixelWidth}x{gifPlayer._animation.PixelHeight} merged={gifPlayer._animation.Merged} step={gifPlayer._animation.Step} {gifPlayer._animation.Bytes / 1048576}MB");
 				gifPlayer._frame = 0;
 				foreach (GifView view2 in gifPlayer._views)
 				{
@@ -88,7 +89,7 @@ internal sealed class GifPlayer : IDisposable
 	public void Reschedule()
 	{
 		_timer.Stop();
-		if (!_disposed && _animation != null && _animation.Frames.Count >= 2 && !_views.All((GifView v) => v.Paused))
+		if (!_disposed && _animation != null && _animation.Frames.Count >= 2 && DesktopActivity.CanAnimate && !_views.All((GifView v) => v.Paused))
 		{
 			_timer.Interval = TimeSpan.FromSeconds(_animation.DelayOf(_frame));
 			_timer.Start();
