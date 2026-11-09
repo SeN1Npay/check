@@ -53,7 +53,7 @@ internal abstract class GamePage : Grid
 	}
 }
 
-// Окно игр: без рамки, скруглённое, свой заголовок; страницы — хаб, раннер, тетрис.
+// Окно игр: без рамки, скруглённое, свой заголовок; страницы — хаб, раннер, тетрис, платформер.
 internal sealed class GameWindow : Window
 {
 	private const double Radius = 18.0;
@@ -221,6 +221,7 @@ internal sealed class GameWindow : Window
 			{
 				GameHub.Dino => new RunnerPage(_app, _pal),
 				GameHub.Tetris => new TetrisPage(_app, _pal),
+				GameHub.Platformer => new PlatformerPage(_app, _pal),
 				_ => new HubPage(_app, _pal, this)
 			};
 		}
