@@ -41,5 +41,6 @@ public enum IntentKind
 	Wave,
 	HideMascot,
 	ShowIsland,
-	Launcher
+	Launcher,
+	PlayGame
 }

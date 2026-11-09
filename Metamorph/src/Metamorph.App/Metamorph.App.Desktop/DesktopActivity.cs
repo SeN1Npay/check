@@ -72,13 +72,28 @@ internal static class DesktopActivity
 		return false;
 	}
 
+	private static readonly object InitGate = new object();
+
+	// Первое обращение может прийти и с UI-потока, и с потока обоев одновременно.
 	private static void Init()
 	{
 		if (_initialized)
 		{
 			return;
 		}
-		_initialized = true;
+		lock (InitGate)
+		{
+			if (_initialized)
+			{
+				return;
+			}
+			InitCore();
+			_initialized = true;
+		}
+	}
+
+	private static void InitCore()
+	{
 		try
 		{
 			_remote = System.Windows.Forms.SystemInformation.TerminalServerSession;
