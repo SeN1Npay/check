@@ -1,0 +1,92 @@
+{
+  "id": "solarized-light",
+  "name": "Solarized Light",
+  "description": "Классическая светлая палитра Итана Шуновера. Родная панель задач по центру с акрилом — без бара и дока.",
+  "author": "Metamorph",
+  "mode": "light",
+  "palette": {
+    "background": "#FDF6E3",
+    "surface": "#EEE8D5",
+    "foreground": "#586E75",
+    "muted": "#93A1A1",
+    "accent": "#268BD2",
+    "accent2": "#6C71C4",
+    "red": "#DC322F",
+    "green": "#859900",
+    "yellow": "#B58900"
+  },
+  "wallpaper": {
+    "kind": "gradient",
+    "from": "#FDF6E3",
+    "to": "#EEE8D5",
+    "direction": "vertical",
+    "style": "fill"
+  },
+  "system": {
+    "transparency": true,
+    "accentOnTaskbar": false,
+    "accentOnTitleBars": true
+  },
+  "taskbar": {
+    "mode": "normal",
+    "centerIcons": true,
+    "style": "acrylic",
+    "opacity": 0.6,
+    "hideSearch": true,
+    "hideTaskView": true,
+    "hideCortana": true,
+    "hidePeople": true,
+    "hideNews": true,
+    "smallIcons": false,
+    "grouping": "always"
+  },
+  "bar": {
+    "enabled": false,
+    "position": "top",
+    "height": 28,
+    "opacity": 0.85,
+    "blur": true,
+    "fontFamily": "JetBrains Mono, Cascadia Mono, Consolas",
+    "fontSize": 13,
+    "clockFormat": "ddd dd MMM  HH:mm",
+    "left": [
+      "launcher",
+      "window"
+    ],
+    "center": [
+      "clock"
+    ],
+    "right": [
+      "layout",
+      "cpu",
+      "ram",
+      "battery",
+      "uptime",
+      "tray"
+    ],
+    "style": "solid"
+  },
+  "dock": {
+    "enabled": false,
+    "position": "bottom",
+    "behavior": "dodgeWindows",
+    "style": "pill",
+    "iconSize": 48,
+    "hoverEffect": "magnify",
+    "magnification": 1.9,
+    "magnifyRange": 2.5,
+    "spacing": 8,
+    "padding": 9,
+    "margin": 8,
+    "cornerRadius": 18,
+    "opacity": 0.8,
+    "indicator": "dots",
+    "bounceOnLaunch": true,
+    "bounceOnAttention": true,
+    "showLabels": true,
+    "showAppsButton": true,
+    "showTrash": true,
+    "showRunningApps": true,
+    "animationSpeed": 1.0
+  }
+}

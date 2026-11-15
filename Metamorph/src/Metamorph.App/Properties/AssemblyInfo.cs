@@ -1,0 +1,37 @@
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
+using System.Windows.Resources;
+
+[assembly: AssemblyAssociatedContentFile("aurora.json")]
+[assembly: AssemblyAssociatedContentFile("autumn.json")]
+[assembly: AssemblyAssociatedContentFile("catppuccin-latte.json")]
+[assembly: AssemblyAssociatedContentFile("catppuccin-mocha.json")]
+[assembly: AssemblyAssociatedContentFile("cyberpunk.json")]
+[assembly: AssemblyAssociatedContentFile("deep-space.json")]
+[assembly: AssemblyAssociatedContentFile("dracula.json")]
+[assembly: AssemblyAssociatedContentFile("ember.json")]
+[assembly: AssemblyAssociatedContentFile("everforest.json")]
+[assembly: AssemblyAssociatedContentFile("gruvbox-dark.json")]
+[assembly: AssemblyAssociatedContentFile("gruvbox-light.json")]
+[assembly: AssemblyAssociatedContentFile("kanagawa.json")]
+[assembly: AssemblyAssociatedContentFile("matrix.json")]
+[assembly: AssemblyAssociatedContentFile("mocha-floating.json")]
+[assembly: AssemblyAssociatedContentFile("nord.json")]
+[assembly: AssemblyAssociatedContentFile("one-dark.json")]
+[assembly: AssemblyAssociatedContentFile("rose-pine.json")]
+[assembly: AssemblyAssociatedContentFile("sakura.json")]
+[assembly: AssemblyAssociatedContentFile("solarized-light.json")]
+[assembly: AssemblyAssociatedContentFile("synthwave-84.json")]
+[assembly: AssemblyAssociatedContentFile("tokyo-night.json")]
+[assembly: AssemblyCompany("Metamorph")]
+[assembly: AssemblyConfiguration("Release")]
+[assembly: AssemblyCopyright("MIT License")]
+[assembly: AssemblyFileVersion("1.6.0.0")]
+[assembly: AssemblyInformationalVersion("1.6.0")]
+[assembly: AssemblyProduct("Metamorph")]
+[assembly: AssemblyTitle("Metamorph")]
+[assembly: TargetPlatform("Windows10.0.19041.0")]
+[assembly: SupportedOSPlatform("Windows10.0.17763.0")]
+[assembly: AssemblyVersion("1.6.0.0")]

@@ -1,0 +1,123 @@
+{
+  "id": "deep-space",
+  "name": "Deep Space",
+  "description": "Глубокий космос: холодный синий акцент и фиолетовые блики.",
+  "author": "Metamorph",
+  "mode": "dark",
+  "palette": {
+    "background": "#05060F",
+    "surface": "#11142A",
+    "foreground": "#DCE3FF",
+    "muted": "#4A5280",
+    "accent": "#7AA2FF",
+    "accent2": "#C792EA",
+    "red": "#FF6B8B",
+    "green": "#7FE3B0",
+    "yellow": "#FFD580"
+  },
+  "wallpaper": {
+    "kind": "gradient",
+    "from": "#000006",
+    "to": "#0E0B24",
+    "direction": "radial",
+    "style": "fill"
+  },
+  "system": {
+    "transparency": true,
+    "accentOnTaskbar": true,
+    "accentOnTitleBars": false
+  },
+  "taskbar": {
+    "mode": "hidden"
+  },
+  "bar": {
+    "enabled": true,
+    "position": "top",
+    "height": 28,
+    "opacity": 0.7,
+    "blur": true,
+    "fontFamily": "JetBrains Mono, Cascadia Mono, Consolas",
+    "fontSize": 13,
+    "clockFormat": "ddd dd MMM  HH:mm",
+    "left": [
+      "launcher",
+      "workspaces",
+      "window"
+    ],
+    "center": [],
+    "right": [
+      "timer",
+      "cpu",
+      "ram",
+      "volume",
+      "network",
+      "clock",
+      "tray"
+    ],
+    "style": "solid"
+  },
+  "dock": {
+    "enabled": true,
+    "position": "bottom",
+    "behavior": "dodgeWindows",
+    "style": "glass",
+    "iconSize": 48,
+    "hoverEffect": "magnify",
+    "magnification": 1.6,
+    "magnifyRange": 2.5,
+    "spacing": 8,
+    "padding": 9,
+    "margin": 8,
+    "cornerRadius": 18,
+    "opacity": 0.7,
+    "indicator": "dots",
+    "bounceOnLaunch": true,
+    "bounceOnAttention": true,
+    "showLabels": true,
+    "showAppsButton": true,
+    "showTrash": true,
+    "showRunningApps": true,
+    "animationSpeed": 1.0
+  },
+  "island": {
+    "enabled": true,
+    "screens": "primary",
+    "overBar": false,
+    "offset": 6,
+    "height": 34,
+    "width": 250,
+    "expandedWidth": 400,
+    "idle": "clock",
+    "opacity": 0.92,
+    "albumArt": true,
+    "visualizer": true,
+    "expandOnHover": true,
+    "trackPopupSeconds": 3,
+    "activities": [
+      "volume",
+      "layout",
+      "capslock",
+      "battery",
+      "theme",
+      "privacy",
+      "network"
+    ],
+    "animationSpeed": 1.0,
+    "hideInFullscreen": true,
+    "clockFormat": "HH:mm"
+  },
+  "windows": {
+    "activeBorder": {
+      "enabled": true,
+      "width": 2,
+      "gradient": true,
+      "radius": 8
+    },
+    "tiling": {
+      "hotkeys": true,
+      "gaps": 10,
+      "masterRatio": 0.55,
+      "engine": "none"
+    }
+  }
+}
