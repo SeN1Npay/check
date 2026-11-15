@@ -1,0 +1,81 @@
+{
+  "id": "catppuccin-latte",
+  "name": "Catppuccin Latte",
+  "description": "Светлая пастельная тема для работы днём.",
+  "author": "Metamorph",
+  "mode": "light",
+  "palette": {
+    "background": "#EFF1F5",
+    "surface": "#CCD0DA",
+    "foreground": "#4C4F69",
+    "muted": "#9CA0B0",
+    "accent": "#1E66F5",
+    "accent2": "#8839EF",
+    "red": "#D20F39",
+    "green": "#40A02B",
+    "yellow": "#DF8E1D"
+  },
+  "wallpaper": {
+    "kind": "gradient",
+    "from": "#EFF1F5",
+    "to": "#DCE0E8",
+    "direction": "vertical",
+    "style": "fill"
+  },
+  "system": {
+    "transparency": true,
+    "accentOnTaskbar": false,
+    "accentOnTitleBars": true
+  },
+  "taskbar": {
+    "mode": "hidden"
+  },
+  "bar": {
+    "enabled": true,
+    "position": "top",
+    "height": 28,
+    "opacity": 0.9,
+    "blur": true,
+    "fontFamily": "JetBrains Mono, Cascadia Mono, Consolas",
+    "fontSize": 13,
+    "clockFormat": "ddd dd MMM  HH:mm",
+    "left": [
+      "launcher",
+      "window"
+    ],
+    "center": [
+      "clock"
+    ],
+    "right": [
+      "layout",
+      "cpu",
+      "ram",
+      "battery",
+      "uptime",
+      "tray"
+    ]
+  },
+  "dock": {
+    "enabled": true,
+    "position": "bottom",
+    "behavior": "alwaysVisible",
+    "style": "glass",
+    "iconSize": 48,
+    "hoverEffect": "magnify",
+    "magnification": 1.7,
+    "magnifyRange": 2.5,
+    "spacing": 8,
+    "padding": 9,
+    "margin": 8,
+    "cornerRadius": 20,
+    "opacity": 0.7,
+    "indicator": "dot",
+    "bounceOnLaunch": true,
+    "bounceOnAttention": true,
+    "showLabels": true,
+    "showAppsButton": true,
+    "showTrash": true,
+    "showRunningApps": true,
+    "animationSpeed": 1.0
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "id": "matrix",
+  "name": "Matrix",
+  "description": "Зелёный на чёрном, моноширинный шрифт, рамка активного окна и «вырез»-остров. Wake up, Neo.",
+  "author": "Metamorph",
+  "mode": "dark",
+  "palette": {
+    "background": "#000A04",
+    "surface": "#0B1F12",
+    "foreground": "#B8FFCF",
+    "muted": "#2F6B45",
+    "accent": "#00FF66",
+    "accent2": "#7CFFB2",
+    "red": "#FF3B3B",
+    "green": "#00FF66",
+    "yellow": "#D4FF5C"
+  },
+  "wallpaper": {
+    "kind": "gradient",
+    "from": "#000000",
+    "to": "#00140A",
+    "direction": "vertical",
+    "style": "fill"
+  },
+  "system": {
+    "transparency": true,
+    "accentOnTaskbar": true,
+    "accentOnTitleBars": false
+  },
+  "taskbar": {
+    "mode": "hidden"
+  },
+  "bar": {
+    "enabled": true,
+    "position": "top",
+    "height": 28,
+    "opacity": 0.9,
+    "blur": false,
+    "fontFamily": "Cascadia Mono, Consolas",
+    "fontSize": 13,
+    "clockFormat": "ddd dd MMM  HH:mm",
+    "left": [
+      "launcher",
+      "workspaces",
+      "window"
+    ],
+    "center": [],
+    "right": [
+      "cpu",
+      "gpu",
+      "ram",
+      "network",
+      "layout",
+      "volume",
+      "clock",
+      "tray"
+    ],
+    "style": "solid"
+  },
+  "dock": {
+    "enabled": true,
+    "position": "bottom",
+    "behavior": "dodgeWindows",
+    "style": "minimal",
+    "iconSize": 48,
+    "hoverEffect": "lift",
+    "magnification": 1.6,
+    "magnifyRange": 2.5,
+    "spacing": 8,
+    "padding": 9,
+    "margin": 8,
+    "cornerRadius": 18,
+    "opacity": 0.7,
+    "indicator": "line",
+    "bounceOnLaunch": true,
+    "bounceOnAttention": true,
+    "showLabels": false,
+    "showAppsButton": true,
+    "showTrash": true,
+    "showRunningApps": true,
+    "animationSpeed": 1.0
+  },
+  "island": {
+    "enabled": true,
+    "screens": "primary",
+    "overBar": false,
+    "offset": 0,
+    "height": 34,
+    "width": 250,
+    "expandedWidth": 400,
+    "idle": "clock",
+    "opacity": 1.0,
+    "albumArt": true,
+    "visualizer": true,
+    "expandOnHover": true,
+    "trackPopupSeconds": 3,
+    "activities": [
+      "volume",
+      "layout",
+      "capslock",
+      "battery",
+      "theme",
+      "privacy",
+      "network"
+    ],
+    "animationSpeed": 1.0,
+    "hideInFullscreen": true,
+    "clockFormat": "HH:mm",
+    "style": "notch"
+  },
+  "windows": {
+    "activeBorder": {
+      "enabled": true,
+      "width": 2,
+      "gradient": false,
+      "radius": 8
+    },
+    "tiling": {
+      "hotkeys": true,
+      "gaps": 10,
+      "masterRatio": 0.55,
+      "engine": "none"
+    }
+  },
+  "sounds": {
+    "scheme": "silent"
+  }
+}

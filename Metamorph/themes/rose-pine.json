@@ -1,0 +1,105 @@
+{
+  "id": "rose-pine",
+  "name": "Rosé Pine",
+  "description": "Приглушённые розовые и золотые тона на тёмно-сливовом фоне. Острова в панели, рамка активного окна.",
+  "author": "Metamorph",
+  "mode": "dark",
+  "palette": {
+    "background": "#191724",
+    "surface": "#26233A",
+    "foreground": "#E0DEF4",
+    "muted": "#6E6A86",
+    "accent": "#EBBCBA",
+    "accent2": "#C4A7E7",
+    "red": "#EB6F92",
+    "green": "#31748F",
+    "yellow": "#F6C177"
+  },
+  "wallpaper": {
+    "kind": "gradient",
+    "from": "#191724",
+    "to": "#403D52",
+    "direction": "radial",
+    "style": "fill"
+  },
+  "system": {
+    "transparency": true,
+    "accentOnTaskbar": true,
+    "accentOnTitleBars": true
+  },
+  "taskbar": {
+    "mode": "hidden"
+  },
+  "bar": {
+    "enabled": true,
+    "position": "top",
+    "height": 28,
+    "opacity": 0.85,
+    "blur": true,
+    "fontFamily": "JetBrains Mono, Cascadia Mono, Consolas",
+    "fontSize": 13,
+    "clockFormat": "ddd dd MMM  HH:mm",
+    "left": [
+      "launcher",
+      "workspaces",
+      "window"
+    ],
+    "center": [
+      "clock"
+    ],
+    "right": [
+      "media",
+      "volume",
+      "network",
+      "battery",
+      "tray",
+      "power"
+    ],
+    "style": "islands"
+  },
+  "dock": {
+    "enabled": true,
+    "position": "bottom",
+    "behavior": "dodgeWindows",
+    "style": "glass",
+    "iconSize": 48,
+    "hoverEffect": "magnify",
+    "magnification": 1.9,
+    "magnifyRange": 2.5,
+    "spacing": 8,
+    "padding": 9,
+    "margin": 8,
+    "cornerRadius": 18,
+    "opacity": 0.8,
+    "indicator": "dot",
+    "bounceOnLaunch": true,
+    "bounceOnAttention": true,
+    "showLabels": true,
+    "showAppsButton": true,
+    "showTrash": true,
+    "showRunningApps": true,
+    "animationSpeed": 1.0,
+    "blur": true,
+    "previews": true,
+    "showRecentFiles": true
+  },
+  "windows": {
+    "activeBorder": {
+      "enabled": true,
+      "width": 3,
+      "gradient": true,
+      "radius": 8
+    },
+    "tiling": {
+      "hotkeys": true,
+      "gaps": 10,
+      "masterRatio": 0.55,
+      "engine": "none"
+    }
+  },
+  "apps": {
+    "windowsTerminal": true,
+    "vsCode": false,
+    "ohMyPosh": false
+  }
+}

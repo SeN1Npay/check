@@ -1,0 +1,81 @@
+{
+  "id": "gruvbox-dark",
+  "name": "Gruvbox Dark",
+  "description": "Тёплый ретро-контраст, любимец пользователей Vim и i3.",
+  "author": "Metamorph",
+  "mode": "dark",
+  "palette": {
+    "background": "#282828",
+    "surface": "#3C3836",
+    "foreground": "#EBDBB2",
+    "muted": "#928374",
+    "accent": "#FE8019",
+    "accent2": "#8EC07C",
+    "red": "#FB4934",
+    "green": "#B8BB26",
+    "yellow": "#FABD2F"
+  },
+  "wallpaper": {
+    "kind": "gradient",
+    "from": "#1D2021",
+    "to": "#504945",
+    "direction": "vertical",
+    "style": "fill"
+  },
+  "system": {
+    "transparency": true,
+    "accentOnTaskbar": true,
+    "accentOnTitleBars": true
+  },
+  "taskbar": {
+    "mode": "hidden"
+  },
+  "bar": {
+    "enabled": true,
+    "position": "top",
+    "height": 28,
+    "opacity": 0.85,
+    "blur": true,
+    "fontFamily": "JetBrains Mono, Cascadia Mono, Consolas",
+    "fontSize": 13,
+    "clockFormat": "ddd dd MMM  HH:mm",
+    "left": [
+      "launcher",
+      "window"
+    ],
+    "center": [
+      "clock"
+    ],
+    "right": [
+      "layout",
+      "cpu",
+      "ram",
+      "battery",
+      "uptime",
+      "tray"
+    ]
+  },
+  "dock": {
+    "enabled": true,
+    "position": "bottom",
+    "behavior": "autoHide",
+    "style": "flat",
+    "iconSize": 48,
+    "hoverEffect": "magnify",
+    "magnification": 1.7,
+    "magnifyRange": 2.5,
+    "spacing": 8,
+    "padding": 9,
+    "margin": 8,
+    "cornerRadius": 10,
+    "opacity": 0.92,
+    "indicator": "line",
+    "bounceOnLaunch": true,
+    "bounceOnAttention": true,
+    "showLabels": true,
+    "showAppsButton": true,
+    "showTrash": true,
+    "showRunningApps": true,
+    "animationSpeed": 1.0
+  }
+}
